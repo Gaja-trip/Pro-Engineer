@@ -32,8 +32,6 @@
       <section class="page-band">
         <div class="container">
           <p class="eyebrow">오늘 강의</p>
-          <h1 class="page-title">지적기술사와 겹치는 과년도 핵심 10문항</h1>
-          <p class="lead">측량 및 지형공간정보기술사 기출과 지적기술사 기출에서 공통으로 반복되는 주제를 골랐습니다. 두 종목의 관점을 함께 보면 답안에 기술적 정확도와 법적 안정성을 동시에 담을 수 있습니다.</p>
           <div class="toolbar">
             <a class="btn" href="exams.html">기출분석으로 이동</a>
             <a class="btn secondary" href="solutions.html">기출풀이로 이동</a>
@@ -42,13 +40,18 @@
       </section>
 
       <section class="page-band tight">
-        <div class="container">
-          <div class="metric-grid" data-today-lecture-summary></div>
+        <div class="container lecture-workspace">
+          <aside class="lecture-sidebar panel pad">
+            <div class="section-head">
+              <div>
+                <h2>문제</h2>
+                <p>공통 주제를 선택하세요.</p>
+              </div>
+            </div>
+            <div class="lecture-problem-list" data-today-lecture-list></div>
+          </aside>
+          <section class="lecture-detail-panel" data-today-lecture-detail></section>
         </div>
-      </section>
-
-      <section class="page-band tight">
-        <div class="container lecture-list" data-today-lecture-list></div>
       </section>
     </main>
 

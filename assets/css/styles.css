@@ -686,6 +686,56 @@ button {
   gap: 18px;
 }
 
+.lecture-workspace {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.lecture-sidebar {
+  position: sticky;
+  top: 88px;
+  max-height: calc(100vh - 110px);
+  overflow: auto;
+}
+
+.lecture-problem-list {
+  display: grid;
+  gap: 10px;
+}
+
+.lecture-problem-button {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+  color: var(--ink);
+  text-align: left;
+}
+
+.lecture-problem-button.active {
+  border-color: var(--sage);
+  background: #eef7f3;
+}
+
+.lecture-problem-button strong {
+  display: block;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.lecture-problem-button span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lecture-detail-panel {
+  min-width: 0;
+}
+
 .lecture-card {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -809,8 +859,14 @@ button {
   .module-layout,
   .solution-grid,
   .qnet-source-panel,
+  .lecture-workspace,
   .pair-grid {
     grid-template-columns: 1fr;
+  }
+
+  .lecture-sidebar {
+    position: static;
+    max-height: none;
   }
 
   .metric-grid,
