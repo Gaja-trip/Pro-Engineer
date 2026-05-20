@@ -1,0 +1,27 @@
+{
+  "name": "pro-engineer",
+  "version": "1.0.0",
+  "description": "Solve Problems",
+  "main": "index.js",
+  "scripts": {
+    "sync:qnet": "node tools/sync-qnet-exams.mjs",
+    "serve": "node tools/static-server.mjs",
+    "test": "node --check tools/sync-qnet-exams.mjs && node --check tools/static-server.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gaja-trip/Pro-Engineer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Gaja-trip/Pro-Engineer/issues"
+  },
+  "homepage": "https://github.com/Gaja-trip/Pro-Engineer#readme",
+  "dependencies": {
+    "hwp.js": "^0.0.3",
+    "pdf-parse": "^2.4.5"
+  }
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surveyor Master · 커리큘럼</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script defer src="assets/js/exams-data.js"></script>
+  <script defer src="assets/js/curriculum-data.js"></script>
+  <script defer src="assets/js/common.js"></script>
+  <script defer src="assets/js/curriculum.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="nav-inner">
+        <a class="brand" href="index.html"><span class="brand-mark">SM</span><span>Surveyor Master</span></a>
+        <button class="menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" data-menu-toggle>☰</button>
+        <nav class="nav-links" data-nav-links>
+          <a href="index.html" data-nav>대시보드</a>
+          <a href="curriculum.html" data-nav>커리큘럼</a>
+          <a href="exams.html" data-nav>기출분석</a>
+          <a href="solutions.html" data-nav>풀이과정</a>
+          <a href="missions.html" data-nav>생활미션</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-band">
+        <div class="container">
+          <p class="eyebrow">현장형 커리큘럼</p>
+          <h1 class="page-title">현상에서 시작해 이론, 기출, 답안으로 이동합니다</h1>
+          <p class="lead">각 모듈은 생활 관찰, 측정 활동, 핵심 이론, 서술형 답안 골격을 한 흐름으로 묶었습니다. 수험자가 외우는 양을 줄이고, 답안에서 사용할 실제 장면을 늘리는 구조입니다.</p>
+        </div>
+      </section>
+
+      <section class="page-band tight">
+        <div class="container module-layout">
+          <aside class="module-list" data-module-list aria-label="커리큘럼 모듈 목록"></aside>
+          <section data-module-detail></section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">생활 관찰형 커리큘럼 · 기출 문항 자동 연결</div>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surveyor Master · 생활미션</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script defer src="assets/js/exams-data.js"></script>
+  <script defer src="assets/js/curriculum-data.js"></script>
+  <script defer src="assets/js/common.js"></script>
+  <script defer src="assets/js/missions.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="nav-inner">
+        <a class="brand" href="index.html"><span class="brand-mark">SM</span><span>Surveyor Master</span></a>
+        <button class="menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" data-menu-toggle>☰</button>
+        <nav class="nav-links" data-nav-links>
+          <a href="index.html" data-nav>대시보드</a>
+          <a href="curriculum.html" data-nav>커리큘럼</a>
+          <a href="exams.html" data-nav>기출분석</a>
+          <a href="solutions.html" data-nav>풀이과정</a>
+          <a href="missions.html" data-nav>생활미션</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-band">
+        <div class="container two-column">
+          <div>
+            <p class="eyebrow">생활 속 미션 카드</p>
+            <h1 class="page-title">걷는 길, 보는 지도, 지나치는 공사가 모두 답안 소재입니다</h1>
+            <p class="lead">미션은 짧아야 계속됩니다. 하루에 하나씩 관찰하고, 사진이나 메모 한 줄을 남긴 뒤, 해당 모듈의 이론 키워드로 바꿔 쓰는 방식입니다.</p>
+          </div>
+          <div class="panel pad">
+            <h2 style="margin-top:0">하루 동선 루틴</h2>
+            <div class="timeline" data-mission-route></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page-band tight">
+        <div class="container">
+          <div class="mission-board" data-mission-board></div>
+        </div>
+      </section>
+
+      <section class="page-band tight">
+        <div class="container panel pad">
+          <div class="section-head">
+            <div>
+              <h2>미션 기록 양식</h2>
+              <p>사진보다 중요한 것은 “어떤 이론으로 설명할 수 있는가”입니다. 아래 네 칸만 채워도 답안 소재가 됩니다.</p>
+            </div>
+          </div>
+          <div class="learning-flow">
+            <div class="flow-step"><b>장소</b><span>어디에서 본 현상인가</span></div>
+            <div class="flow-step"><b>현상</b><span>무엇이 흔들리거나 보정되었나</span></div>
+            <div class="flow-step"><b>이론</b><span>오차, 좌표, 영상, 분석 중 무엇인가</span></div>
+            <div class="flow-step"><b>답안</b><span>개요나 결론에 넣을 한 문장</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">생활미션 · 현장감 있는 서술형 답안 준비</div>
+    </footer>
+  </div>
+</body>
+</html>
