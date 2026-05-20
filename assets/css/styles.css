@@ -82,12 +82,61 @@ button {
 .brand-mark {
   width: 34px;
   height: 34px;
+  position: relative;
   display: grid;
   place-items: center;
   border-radius: var(--radius);
   background: var(--ink);
   color: #fff;
   font-size: 13px;
+}
+
+.survey-logo {
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, #17324d 0%, #2f6759 100%);
+}
+
+.survey-logo::before,
+.survey-logo::after {
+  content: "";
+  position: absolute;
+}
+
+.survey-logo::before {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+}
+
+.survey-logo::after {
+  width: 24px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.9);
+}
+
+.logo-scope,
+.logo-pin {
+  position: absolute;
+  display: block;
+}
+
+.logo-scope {
+  width: 2px;
+  height: 25px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.logo-pin {
+  width: 7px;
+  height: 7px;
+  right: 7px;
+  bottom: 7px;
+  border-radius: 50%;
+  background: #fbbf24;
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.22);
 }
 
 .nav-links {
@@ -597,10 +646,72 @@ button {
   font-size: 13px;
 }
 
+.qnet-source-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.qnet-search-box {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  padding: 18px;
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.breadcrumb span:not(:last-child)::after {
+  content: ">";
+  margin-left: 8px;
+  color: #94a3b8;
+}
+
 .solution-grid {
   display: grid;
   grid-template-columns: 330px minmax(0, 1fr);
   gap: 20px;
+}
+
+.lecture-list {
+  display: grid;
+  gap: 18px;
+}
+
+.lecture-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.pair-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.pair-box {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  padding: 14px;
+}
+
+.pair-box b {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--sage);
 }
 
 .answer-paper {
@@ -696,7 +807,9 @@ button {
   .two-column,
   .dashboard-grid,
   .module-layout,
-  .solution-grid {
+  .solution-grid,
+  .qnet-source-panel,
+  .pair-grid {
     grid-template-columns: 1fr;
   }
 

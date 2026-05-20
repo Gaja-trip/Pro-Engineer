@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "sync:qnet": "node tools/sync-qnet-exams.mjs",
+    "build:lecture": "node tools/build-today-lecture.mjs",
     "serve": "node tools/static-server.mjs",
-    "test": "node --check tools/sync-qnet-exams.mjs && node --check tools/static-server.mjs"
+    "test": "node --check tools/sync-qnet-exams.mjs && node --check tools/build-today-lecture.mjs && node --check tools/static-server.mjs"
   },
   "repository": {
     "type": "git",

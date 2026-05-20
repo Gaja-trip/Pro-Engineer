@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>측량 및 지형공간정보기술사 · 답안작성</title>
+  <title>측량 및 지형공간정보기술사 · 오늘강의</title>
   <link rel="stylesheet" href="assets/css/styles.css">
   <script defer src="assets/js/exams-data.js"></script>
   <script defer src="assets/js/curriculum-data.js"></script>
+  <script defer src="assets/js/today-lecture-data.js"></script>
   <script defer src="assets/js/common.js"></script>
-  <script defer src="assets/js/curriculum.js"></script>
+  <script defer src="assets/js/today-lecture.js"></script>
 </head>
 <body>
   <div class="shell">
@@ -30,22 +31,29 @@
     <main>
       <section class="page-band">
         <div class="container">
-          <p class="eyebrow">현장형 답안작성</p>
-          <h1 class="page-title">현상에서 시작해 이론, 기출, 답안으로 이동합니다</h1>
-          <p class="lead">각 모듈은 생활 관찰, 측정 활동, 핵심 이론, 서술형 답안 골격을 한 흐름으로 묶었습니다. 수험자가 외우는 양을 줄이고, 답안에서 사용할 실제 장면을 늘리는 구조입니다.</p>
+          <p class="eyebrow">오늘 강의</p>
+          <h1 class="page-title">지적기술사와 겹치는 과년도 핵심 10문항</h1>
+          <p class="lead">측량 및 지형공간정보기술사 기출과 지적기술사 기출에서 공통으로 반복되는 주제를 골랐습니다. 두 종목의 관점을 함께 보면 답안에 기술적 정확도와 법적 안정성을 동시에 담을 수 있습니다.</p>
+          <div class="toolbar">
+            <a class="btn" href="exams.html">기출분석으로 이동</a>
+            <a class="btn secondary" href="solutions.html">기출풀이로 이동</a>
+          </div>
         </div>
       </section>
 
       <section class="page-band tight">
-        <div class="container module-layout">
-          <aside class="module-list" data-module-list aria-label="답안작성 모듈 목록"></aside>
-          <section data-module-detail></section>
+        <div class="container">
+          <div class="metric-grid" data-today-lecture-summary></div>
         </div>
+      </section>
+
+      <section class="page-band tight">
+        <div class="container lecture-list" data-today-lecture-list></div>
       </section>
     </main>
 
     <footer class="footer">
-      <div class="container">생활 관찰형 답안작성 · 기출 문항 자동 연결</div>
+      <div class="container">Q-net 과년도 문제 기반 · 지적기술사 공통 주제 비교 강의</div>
     </footer>
   </div>
 </body>

@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const detail = document.querySelector("[data-exam-detail]");
   const heat = document.querySelector("[data-heatmap]");
   const bars = document.querySelector("[data-exam-topic-bars]");
+  const qnetSourceList = document.querySelector("[data-qnet-source-list]");
 
   function setupFilters() {
     const years = [...new Set(data.exams.map((exam) => exam.year))].sort((a, b) => b - a);
@@ -79,6 +80,28 @@ document.addEventListener("DOMContentLoaded", () => {
       .map(([topic, value]) => ({ label: labels[topic] ?? topic, value }))
       .sort((a, b) => b.value - a.value);
     app.renderBars(bars, rows, { suffix: "문" });
+  }
+
+  function renderQnetSourceList() {
+    if (!qnetSourceList) {
+      return;
+    }
+
+    qnetSourceList.innerHTML = data.exams
+      .slice(0, 8)
+      .map(
+        (exam) => `
+          <article class="question-item">
+            <div class="tag-row">
+              <span class="tag">제${exam.round}회</span>
+              <span class="tag">${exam.year}년</span>
+              <span class="tag">${exam.sourceType}</span>
+            </div>
+            <p style="margin:10px 0 0">${app.escapeHTML(exam.title)}</p>
+          </article>
+        `,
+      )
+      .join("");
   }
 
   function renderList() {
@@ -168,6 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilters();
   renderHeatmap();
   renderTopicBars();
+  renderQnetSourceList();
   renderList();
 
   [yearFilter, topicFilter, searchInput].forEach((control) => {
