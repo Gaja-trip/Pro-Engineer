@@ -162,12 +162,74 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
+  function renderCardNews(news) {
+    if (!news) {
+      return "";
+    }
+
+    return `
+      <section class="card-news-board">
+        <div class="detail-heading">
+          <span>이미지형 카드뉴스</span>
+          <h3>${app.escapeHTML(news.title)}</h3>
+        </div>
+        <p class="presentation-subtitle">${app.escapeHTML(news.subtitle)}</p>
+
+        <div class="card-news-hero">
+          <div>
+            <span class="card-news-label">핵심 프레임</span>
+            <h4>${app.escapeHTML(news.hero.headline)}</h4>
+            <p>${app.escapeHTML(news.hero.text)}</p>
+            <div class="card-news-chips">
+              ${(news.hero.chips ?? []).map((chip) => `<span>${app.escapeHTML(chip)}</span>`).join("")}
+            </div>
+          </div>
+          <div class="layer-visual" aria-hidden="true">
+            <div class="layer-card terrain">
+              <b>지형도</b>
+              <span>도로 · 하천 · 건물</span>
+            </div>
+            <div class="layer-card boundary">
+              <b>지적도</b>
+              <span>필지 · 경계 · 지번</span>
+            </div>
+            <div class="layer-card solution">
+              <b>정합</b>
+              <span>기준점 · 좌표 · 이력</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-news-grid">
+          ${(news.cards ?? [])
+            .map(
+              (card) => `
+                <article class="news-card">
+                  <div class="news-card-top">
+                    <span>${app.escapeHTML(card.no)}</span>
+                    <b>${app.escapeHTML(card.kicker)}</b>
+                  </div>
+                  <h4>${app.escapeHTML(card.title)}</h4>
+                  <p>${app.escapeHTML(card.caption)}</p>
+                  <ul>${renderBullets(card.points)}</ul>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <p class="card-news-closing">${app.escapeHTML(news.closing)}</p>
+      </section>
+    `;
+  }
+
   function lecturePages(lecture) {
     return [
       { id: "explanation", label: "답안작성 설명", render: () => renderAnswerWriting(lecture) },
       ...(lecture.reportSummary ? [{ id: "report", label: "보고서 핵심 정리", render: () => renderReportSummary(lecture.reportSummary) }] : []),
       ...(lecture.answerExample ? [{ id: "example", label: "답안 예시", render: () => renderAnswerExample(lecture.answerExample) }] : []),
       ...(lecture.presentationSummary ? [{ id: "presentation", label: "PPT 이해정리", render: () => renderPresentationSummary(lecture.presentationSummary) }] : []),
+      ...(lecture.cardNews ? [{ id: "card-news", label: "카드뉴스", render: () => renderCardNews(lecture.cardNews) }] : []),
     ];
   }
 

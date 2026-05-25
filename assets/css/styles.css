@@ -798,7 +798,8 @@ button {
 
 .lecture-page-content > .lecture-report,
 .lecture-page-content > .answer-example,
-.lecture-page-content > .presentation-summary {
+.lecture-page-content > .presentation-summary,
+.lecture-page-content > .card-news-board {
   margin-top: 0;
 }
 
@@ -827,7 +828,8 @@ button {
 
 .lecture-report,
 .answer-example,
-.presentation-summary {
+.presentation-summary,
+.card-news-board {
   margin-top: 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1025,6 +1027,187 @@ button {
   border-left: 4px solid var(--sage);
 }
 
+.card-news-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+  gap: 18px;
+  align-items: stretch;
+  border: 1px solid #c7d3df;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #ffffff 0%, #eef7f3 100%);
+  padding: 18px;
+}
+
+.card-news-label {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: var(--sage);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.card-news-hero h4 {
+  margin: 0 0 10px;
+  font-size: 24px;
+  line-height: 1.35;
+}
+
+.card-news-hero p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.card-news-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.card-news-chips span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 7px 10px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.layer-visual {
+  display: grid;
+  gap: 10px;
+}
+
+.layer-card {
+  position: relative;
+  min-height: 74px;
+  display: grid;
+  align-content: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px 16px;
+}
+
+.layer-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 8px;
+}
+
+.layer-card.terrain::before {
+  background: #3b82f6;
+}
+
+.layer-card.boundary::before {
+  background: #f59e0b;
+}
+
+.layer-card.solution::before {
+  background: var(--sage);
+}
+
+.layer-card b,
+.layer-card span {
+  position: relative;
+}
+
+.layer-card b {
+  margin-bottom: 4px;
+}
+
+.layer-card span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.card-news-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.news-card {
+  min-height: 330px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 16px;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.07);
+}
+
+.news-card:nth-child(2n) {
+  background: #fffaf0;
+}
+
+.news-card:nth-child(3n) {
+  background: #f0f7ff;
+}
+
+.news-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.news-card-top span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 900;
+}
+
+.news-card-top b {
+  color: var(--sage);
+  font-size: 13px;
+}
+
+.news-card h4 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+.news-card p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.news-card ul {
+  margin: auto 0 0;
+  padding-left: 18px;
+}
+
+.news-card li {
+  margin: 6px 0;
+}
+
+.card-news-closing {
+  margin: 14px 0 0;
+  border: 1px solid #c7d3df;
+  border-left: 4px solid var(--sage);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+  color: var(--ink);
+  font-weight: 900;
+}
+
 .mission-board {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1114,7 +1297,9 @@ button {
   .insight-grid,
   .answer-example-grid,
   .presentation-flow,
-  .takeaway-grid {
+  .takeaway-grid,
+  .card-news-hero,
+  .card-news-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1141,6 +1326,8 @@ button {
   .answer-example-grid,
   .presentation-flow,
   .takeaway-grid,
+  .card-news-hero,
+  .card-news-grid,
   .answer-map-row {
     grid-template-columns: 1fr;
   }

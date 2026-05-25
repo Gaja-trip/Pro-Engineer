@@ -352,6 +352,7 @@ function existingLectureExtras() {
         lecture.id,
         {
           answerExample: lecture.answerExample,
+          cardNews: lecture.cardNews,
           presentationSummary: lecture.presentationSummary,
           reportSummary: lecture.reportSummary,
         },
@@ -393,6 +394,7 @@ async function main() {
       ...(extras.reportSummary ? { reportSummary: extras.reportSummary } : {}),
       ...(extras.answerExample ? { answerExample: extras.answerExample } : {}),
       ...(extras.presentationSummary ? { presentationSummary: extras.presentationSummary } : {}),
+      ...(extras.cardNews ? { cardNews: extras.cardNews } : {}),
     });
     if (lectures.length === 10) break;
   }
