@@ -787,6 +787,115 @@ button {
   color: var(--sage);
 }
 
+.lecture-report,
+.answer-example {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
+  padding: 18px;
+}
+
+.detail-heading {
+  margin-bottom: 14px;
+}
+
+.detail-heading span {
+  display: inline-block;
+  margin-bottom: 6px;
+  color: var(--sage);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.detail-heading h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.summary-list,
+.answer-example-section ul,
+.insight-grid ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.summary-list li,
+.answer-example-section li,
+.insight-grid li {
+  margin: 6px 0;
+}
+
+.comparison-table {
+  display: grid;
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.comparison-row {
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr) minmax(0, 1fr);
+  border-top: 1px solid var(--line);
+}
+
+.comparison-row:first-child {
+  border-top: 0;
+}
+
+.comparison-row > * {
+  padding: 12px;
+  border-left: 1px solid var(--line);
+}
+
+.comparison-row > *:first-child {
+  border-left: 0;
+}
+
+.comparison-head {
+  background: #eef7f3;
+  color: var(--sage);
+}
+
+.insight-grid,
+.answer-example-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.insight-grid > div,
+.answer-example-section {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.insight-grid h4,
+.answer-example-section h4 {
+  margin: 0 0 10px;
+  color: var(--sage);
+}
+
+.answer-opening,
+.answer-closing {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.7;
+}
+
+.answer-closing {
+  margin-top: 14px;
+  padding: 14px;
+  border-left: 4px solid var(--sage);
+  background: var(--surface);
+}
+
 .mission-board {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -872,7 +981,9 @@ button {
   .metric-grid,
   .card-grid,
   .learning-flow,
-  .mission-board {
+  .mission-board,
+  .insight-grid,
+  .answer-example-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -894,12 +1005,33 @@ button {
   .metric-grid,
   .card-grid,
   .learning-flow,
-  .mission-board {
+  .mission-board,
+  .insight-grid,
+  .answer-example-grid {
     grid-template-columns: 1fr;
   }
 
   .exam-card {
     grid-template-columns: 1fr;
+  }
+
+  .comparison-head {
+    display: none;
+  }
+
+  .comparison-row {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-row > * {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .comparison-row > *:first-child {
+    border-top: 0;
+    background: #eef7f3;
+    color: var(--sage);
   }
 
   .bar-row {

@@ -341,8 +341,29 @@ function solutionFor(theme, survey, cadastral) {
   };
 }
 
+function existingLectureExtras() {
+  try {
+    const text = readFileSync(path.join(rootDir, "assets", "js", "today-lecture-data.js"), "utf8");
+    const match = text.match(/window\.TODAY_LECTURE\s*=\s*([\s\S]*);\s*$/);
+    if (!match) return new Map();
+    const existing = JSON.parse(match[1]);
+    return new Map(
+      (existing.lectures ?? []).map((lecture) => [
+        lecture.id,
+        {
+          answerExample: lecture.answerExample,
+          reportSummary: lecture.reportSummary,
+        },
+      ]),
+    );
+  } catch {
+    return new Map();
+  }
+}
+
 async function main() {
   const surveyData = JSON.parse(readFileSync(path.join(rootDir, "sources", "qnet-exams.json"), "utf8"));
+  const extrasByLecture = existingLectureExtras();
   const cadastralRows = await getSearchResults();
   const cadastralExams = [];
   for (const row of cadastralRows) {
@@ -359,6 +380,7 @@ async function main() {
     if (!survey || !cadastral) continue;
     used.add(`${survey.subject}-${survey.examRound}-${survey.period}-${survey.no}`);
     used.add(`${cadastral.subject}-${cadastral.examRound}-${cadastral.period}-${cadastral.no}`);
+    const extras = extrasByLecture.get(theme.id) ?? {};
     lectures.push({
       id: theme.id,
       title: theme.title,
@@ -367,6 +389,8 @@ async function main() {
       surveyQuestion: survey,
       cadastralQuestion: cadastral,
       solution: solutionFor(theme, survey, cadastral),
+      ...(extras.reportSummary ? { reportSummary: extras.reportSummary } : {}),
+      ...(extras.answerExample ? { answerExample: extras.answerExample } : {}),
     });
     if (lectures.length === 10) break;
   }

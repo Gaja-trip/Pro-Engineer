@@ -9,6 +9,87 @@ document.addEventListener("DOMContentLoaded", () => {
     return `제${question.examRound}회 · ${question.period}교시 ${question.no}번`;
   }
 
+  function renderBullets(items = []) {
+    return items.map((item) => `<li>${app.escapeHTML(item)}</li>`).join("");
+  }
+
+  function renderReportSummary(summary) {
+    if (!summary) {
+      return "";
+    }
+
+    return `
+      <section class="lecture-report">
+        <div class="detail-heading">
+          <span>보고서 핵심 정리</span>
+          <h3>${app.escapeHTML(summary.title)}</h3>
+        </div>
+        <ul class="summary-list">
+          ${renderBullets(summary.corePoints)}
+        </ul>
+
+        <div class="comparison-table" aria-label="지형도와 지적도 비교">
+          <div class="comparison-row comparison-head">
+            <b>구분</b>
+            <b>지형도</b>
+            <b>지적도</b>
+          </div>
+          ${(summary.comparison ?? [])
+            .map(
+              (row) => `
+                <div class="comparison-row">
+                  <b>${app.escapeHTML(row.label)}</b>
+                  <span>${app.escapeHTML(row.topographic)}</span>
+                  <span>${app.escapeHTML(row.cadastral)}</span>
+                </div>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="insight-grid">
+          <div>
+            <h4>주요 원인</h4>
+            <ul>${renderBullets(summary.causes)}</ul>
+          </div>
+          <div>
+            <h4>현장 영향</h4>
+            <ul>${renderBullets(summary.effects)}</ul>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function renderAnswerExample(example) {
+    if (!example) {
+      return "";
+    }
+
+    return `
+      <section class="answer-example">
+        <div class="detail-heading">
+          <span>답안 예시</span>
+          <h3>${app.escapeHTML(example.title)}</h3>
+        </div>
+        <p class="answer-opening">${app.escapeHTML(example.opening)}</p>
+        <div class="answer-example-grid">
+          ${(example.sections ?? [])
+            .map(
+              (section) => `
+                <section class="answer-example-section">
+                  <h4>${app.escapeHTML(section.heading)}</h4>
+                  <ul>${renderBullets(section.points)}</ul>
+                </section>
+              `,
+            )
+            .join("")}
+        </div>
+        <p class="answer-closing">${app.escapeHTML(example.closing)}</p>
+      </section>
+    `;
+  }
+
   function renderList() {
     if (!list) {
       return;
@@ -81,6 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <p>${app.escapeHTML(lecture.solution.closing)}</p>
           </section>
         </div>
+
+        ${renderReportSummary(lecture.reportSummary)}
+        ${renderAnswerExample(lecture.answerExample)}
       </article>
     `;
   }
