@@ -91,6 +91,83 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
+  function renderBasicLecture(lecture) {
+    if (!lecture) {
+      return "";
+    }
+
+    return `
+      <section class="basic-lecture">
+        <div class="detail-heading">
+          <span>기본강의</span>
+          <h3>${app.escapeHTML(lecture.title)}</h3>
+        </div>
+        <p class="presentation-subtitle">${app.escapeHTML(lecture.subtitle)}</p>
+
+        <div class="basic-hero">
+          <div>
+            <span class="card-news-label">먼저 잡을 큰 그림</span>
+            <h4>${app.escapeHTML(lecture.coreMessage)}</h4>
+            <p>${app.escapeHTML(lecture.lead)}</p>
+          </div>
+          <div class="basic-flow-visual" aria-hidden="true">
+            ${(lecture.flow ?? [])
+              .map(
+                (item) => `
+                  <div class="basic-flow-step">
+                    <b>${app.escapeHTML(item.label)}</b>
+                    <span>${app.escapeHTML(item.text)}</span>
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+        </div>
+
+        <div class="concept-card-grid">
+          ${(lecture.concepts ?? [])
+            .map(
+              (concept) => `
+                <article class="concept-card">
+                  <div class="concept-visual ${app.escapeHTML(concept.visual)}">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <div>
+                    <span class="takeaway-meta">${app.escapeHTML(concept.kicker)}</span>
+                    <h4>${app.escapeHTML(concept.title)}</h4>
+                    <p>${app.escapeHTML(concept.summary)}</p>
+                    <ul>${renderBullets(concept.points)}</ul>
+                  </div>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="basic-knowledge">
+          <div class="detail-heading compact">
+            <span>기본지식</span>
+            <h3>답안 전에 알아둘 핵심</h3>
+          </div>
+          <div class="knowledge-grid">
+            ${(lecture.knowledge ?? [])
+              .map(
+                (item) => `
+                  <section class="knowledge-card">
+                    <b>${app.escapeHTML(item.term)}</b>
+                    <p>${app.escapeHTML(item.explain)}</p>
+                  </section>
+                `,
+              )
+              .join("")}
+          </div>
+        </div>
+
+        <p class="memory-line">${app.escapeHTML(lecture.memoryLine)}</p>
+      </section>
+    `;
+  }
+
   function renderPresentationSummary(summary) {
     if (!summary) {
       return "";
@@ -227,6 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return [
       { id: "explanation", label: "답안작성 설명", render: () => renderAnswerWriting(lecture) },
       ...(lecture.reportSummary ? [{ id: "report", label: "보고서 핵심 정리", render: () => renderReportSummary(lecture.reportSummary) }] : []),
+      ...(lecture.basicLecture ? [{ id: "basic", label: "기본강의", render: () => renderBasicLecture(lecture.basicLecture) }] : []),
       ...(lecture.answerExample ? [{ id: "example", label: "답안 예시", render: () => renderAnswerExample(lecture.answerExample) }] : []),
       ...(lecture.presentationSummary ? [{ id: "presentation", label: "PPT 이해정리", render: () => renderPresentationSummary(lecture.presentationSummary) }] : []),
       ...(lecture.cardNews ? [{ id: "card-news", label: "카드뉴스", render: () => renderCardNews(lecture.cardNews) }] : []),

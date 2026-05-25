@@ -352,6 +352,7 @@ function existingLectureExtras() {
         lecture.id,
         {
           answerExample: lecture.answerExample,
+          basicLecture: lecture.basicLecture,
           cardNews: lecture.cardNews,
           presentationSummary: lecture.presentationSummary,
           reportSummary: lecture.reportSummary,
@@ -392,6 +393,7 @@ async function main() {
       cadastralQuestion: cadastral,
       solution: solutionFor(theme, survey, cadastral),
       ...(extras.reportSummary ? { reportSummary: extras.reportSummary } : {}),
+      ...(extras.basicLecture ? { basicLecture: extras.basicLecture } : {}),
       ...(extras.answerExample ? { answerExample: extras.answerExample } : {}),
       ...(extras.presentationSummary ? { presentationSummary: extras.presentationSummary } : {}),
       ...(extras.cardNews ? { cardNews: extras.cardNews } : {}),

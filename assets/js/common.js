@@ -60,6 +60,37 @@
       .join("");
   }
 
+  function setupPlatformNavigation() {
+    const links = document.querySelector("[data-nav-links]");
+    const navInner = document.querySelector(".nav-inner");
+    if (!links || !navInner) {
+      return;
+    }
+
+    const items = [
+      ["index.html", "홈"],
+      ["curriculum.html", "기본 강의 자료"],
+      ["exams.html", "회차별 문제"],
+      ["solutions.html", "문제풀이"],
+      ["resources.html", "자료실"],
+      ["qna.html", "Q&A"],
+    ];
+
+    links.innerHTML = items
+      .map(([href, label]) => `<a href="${href}" data-nav>${label}</a>`)
+      .join("");
+
+    if (!navInner.querySelector(".nav-actions")) {
+      const actions = document.createElement("div");
+      actions.className = "nav-actions";
+      actions.innerHTML = `
+        <a class="nav-login" href="qna.html">로그인</a>
+        <a class="nav-start" href="today-lecture.html">오늘학습</a>
+      `;
+      navInner.append(actions);
+    }
+  }
+
   function setActiveNavigation() {
     const current = location.pathname.split("/").pop() || "index.html";
     document.querySelectorAll("[data-nav]").forEach((link) => {
@@ -89,6 +120,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+    setupPlatformNavigation();
     setActiveNavigation();
     setupMenu();
   });
