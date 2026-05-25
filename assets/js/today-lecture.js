@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const list = document.querySelector("[data-today-lecture-list]");
   const detail = document.querySelector("[data-today-lecture-detail]");
   let selectedId = data.lectures[0]?.id;
+  let selectedPage = "explanation";
 
   function questionMeta(question) {
     return `제${question.examRound}회 · ${question.period}교시 ${question.no}번`;
@@ -90,6 +91,60 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
+  function lecturePages(lecture) {
+    return [
+      { id: "explanation", label: "답안작성 설명", render: () => renderAnswerWriting(lecture) },
+      ...(lecture.reportSummary ? [{ id: "report", label: "보고서 핵심 정리", render: () => renderReportSummary(lecture.reportSummary) }] : []),
+      ...(lecture.answerExample ? [{ id: "example", label: "답안 예시", render: () => renderAnswerExample(lecture.answerExample) }] : []),
+    ];
+  }
+
+  function renderPageTabs(pages) {
+    if (pages.length < 2) {
+      return "";
+    }
+
+    return `
+      <nav class="lecture-page-tabs" aria-label="오늘강의 상세 페이지">
+        ${pages
+          .map(
+            (page) => `
+              <button class="lecture-page-tab ${page.id === selectedPage ? "active" : ""}" type="button" data-lecture-page="${page.id}">
+                ${app.escapeHTML(page.label)}
+              </button>
+            `,
+          )
+          .join("")}
+      </nav>
+    `;
+  }
+
+  function renderAnswerWriting(lecture) {
+    return `
+      <div class="answer-paper lecture-page-body">
+        <section class="answer-block">
+          <h4>설명</h4>
+          <p>${app.escapeHTML(lecture.overlapReason)}</p>
+          <p>${app.escapeHTML(lecture.solution.intro)}</p>
+        </section>
+        <section class="answer-block">
+          <h4>답안 작성 순서</h4>
+          <ol>
+            ${lecture.solution.steps.map((step) => `<li>${app.escapeHTML(step)}</li>`).join("")}
+          </ol>
+        </section>
+        <section class="answer-block">
+          <h4>현장감 문장</h4>
+          <p>${app.escapeHTML(lecture.solution.fieldLink)}</p>
+        </section>
+        <section class="answer-block">
+          <h4>마무리 방향</h4>
+          <p>${app.escapeHTML(lecture.solution.closing)}</p>
+        </section>
+      </div>
+    `;
+  }
+
   function renderList() {
     if (!list) {
       return;
@@ -121,6 +176,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const pages = lecturePages(lecture);
+    if (!pages.some((page) => page.id === selectedPage)) {
+      selectedPage = pages[0].id;
+    }
+    const currentPage = pages.find((page) => page.id === selectedPage) ?? pages[0];
+
     detail.innerHTML = `
       <article class="lecture-card">
         <div class="tag-row">
@@ -141,30 +202,10 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         </div>
 
-        <div class="answer-paper" style="margin-top:16px">
-          <section class="answer-block">
-            <h4>설명</h4>
-            <p>${app.escapeHTML(lecture.overlapReason)}</p>
-            <p>${app.escapeHTML(lecture.solution.intro)}</p>
-          </section>
-          <section class="answer-block">
-            <h4>답안 작성 순서</h4>
-            <ol>
-              ${lecture.solution.steps.map((step) => `<li>${app.escapeHTML(step)}</li>`).join("")}
-            </ol>
-          </section>
-          <section class="answer-block">
-            <h4>현장감 문장</h4>
-            <p>${app.escapeHTML(lecture.solution.fieldLink)}</p>
-          </section>
-          <section class="answer-block">
-            <h4>마무리 방향</h4>
-            <p>${app.escapeHTML(lecture.solution.closing)}</p>
-          </section>
+        ${renderPageTabs(pages)}
+        <div class="lecture-page-content">
+          ${currentPage.render()}
         </div>
-
-        ${renderReportSummary(lecture.reportSummary)}
-        ${renderAnswerExample(lecture.answerExample)}
       </article>
     `;
   }
@@ -175,7 +216,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     selectedId = button.dataset.lectureId;
+    selectedPage = "explanation";
     renderList();
+    renderDetail();
+  });
+
+  detail?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-lecture-page]");
+    if (!button) {
+      return;
+    }
+    selectedPage = button.dataset.lecturePage;
     renderDetail();
   });
 

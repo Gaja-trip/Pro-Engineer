@@ -764,6 +764,43 @@ button {
   color: var(--sage);
 }
 
+.lecture-page-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+}
+
+.lecture-page-tab {
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.lecture-page-tab.active {
+  border-color: var(--sage);
+  background: var(--surface);
+  color: var(--sage);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.lecture-page-content {
+  margin-top: 16px;
+}
+
+.lecture-page-content > .lecture-report,
+.lecture-page-content > .answer-example {
+  margin-top: 0;
+}
+
 .answer-paper {
   border: 1px solid #c7d3df;
   border-radius: var(--radius);
