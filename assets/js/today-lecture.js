@@ -91,11 +91,83 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
+  function renderPresentationSummary(summary) {
+    if (!summary) {
+      return "";
+    }
+
+    return `
+      <section class="presentation-summary">
+        <div class="detail-heading">
+          <span>PPT 이해정리</span>
+          <h3>${app.escapeHTML(summary.title)}</h3>
+        </div>
+        <p class="presentation-subtitle">${app.escapeHTML(summary.subtitle)}</p>
+        <div class="key-message">
+          ${app.escapeHTML(summary.coreMessage)}
+        </div>
+
+        <div class="presentation-flow">
+          ${(summary.flow ?? [])
+            .map(
+              (step, index) => `
+                <section class="presentation-flow-card">
+                  <span>${String(index + 1).padStart(2, "0")} · ${app.escapeHTML(step.label)}</span>
+                  <h4>${app.escapeHTML(step.title)}</h4>
+                  <p>${app.escapeHTML(step.text)}</p>
+                </section>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="detail-heading compact">
+          <span>슬라이드별 핵심</span>
+          <h3>그림 자료를 답안 문장으로 바꾸는 법</h3>
+        </div>
+        <div class="takeaway-grid">
+          ${(summary.takeaways ?? [])
+            .map(
+              (item) => `
+                <section class="takeaway-card">
+                  <div class="takeaway-meta">Slide ${app.escapeHTML(item.slide)}</div>
+                  <h4>${app.escapeHTML(item.title)}</h4>
+                  <p>${app.escapeHTML(item.summary)}</p>
+                  <b>${app.escapeHTML(item.answerTip)}</b>
+                </section>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="answer-map">
+          <div class="detail-heading compact">
+            <span>답안 연결</span>
+            <h3>목차별로 가져갈 문장</h3>
+          </div>
+          ${(summary.answerMap ?? [])
+            .map(
+              (row) => `
+                <div class="answer-map-row">
+                  <b>${app.escapeHTML(row.part)}</b>
+                  <span>${app.escapeHTML(row.write)}</span>
+                </div>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <p class="memory-line">${app.escapeHTML(summary.memoryLine)}</p>
+      </section>
+    `;
+  }
+
   function lecturePages(lecture) {
     return [
       { id: "explanation", label: "답안작성 설명", render: () => renderAnswerWriting(lecture) },
       ...(lecture.reportSummary ? [{ id: "report", label: "보고서 핵심 정리", render: () => renderReportSummary(lecture.reportSummary) }] : []),
       ...(lecture.answerExample ? [{ id: "example", label: "답안 예시", render: () => renderAnswerExample(lecture.answerExample) }] : []),
+      ...(lecture.presentationSummary ? [{ id: "presentation", label: "PPT 이해정리", render: () => renderPresentationSummary(lecture.presentationSummary) }] : []),
     ];
   }
 

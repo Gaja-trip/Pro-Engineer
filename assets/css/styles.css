@@ -797,7 +797,8 @@ button {
 }
 
 .lecture-page-content > .lecture-report,
-.lecture-page-content > .answer-example {
+.lecture-page-content > .answer-example,
+.lecture-page-content > .presentation-summary {
   margin-top: 0;
 }
 
@@ -825,7 +826,8 @@ button {
 }
 
 .lecture-report,
-.answer-example {
+.answer-example,
+.presentation-summary {
   margin-top: 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -933,6 +935,96 @@ button {
   background: var(--surface);
 }
 
+.presentation-subtitle {
+  margin: -6px 0 14px;
+  color: var(--muted);
+}
+
+.key-message,
+.memory-line {
+  border: 1px solid #c7d3df;
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 16px;
+  color: var(--ink);
+  font-weight: 800;
+  line-height: 1.7;
+}
+
+.presentation-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.presentation-flow-card,
+.takeaway-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.presentation-flow-card span,
+.takeaway-meta {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--sage);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.presentation-flow-card h4,
+.takeaway-card h4 {
+  margin: 0 0 8px;
+}
+
+.presentation-flow-card p,
+.takeaway-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.detail-heading.compact {
+  margin-top: 20px;
+}
+
+.takeaway-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.takeaway-card b {
+  display: block;
+  margin-top: 10px;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.answer-map {
+  margin-top: 18px;
+}
+
+.answer-map-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.answer-map-row b {
+  color: var(--sage);
+}
+
+.memory-line {
+  margin: 16px 0 0;
+  border-left: 4px solid var(--sage);
+}
+
 .mission-board {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1020,7 +1112,9 @@ button {
   .learning-flow,
   .mission-board,
   .insight-grid,
-  .answer-example-grid {
+  .answer-example-grid,
+  .presentation-flow,
+  .takeaway-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1044,7 +1138,10 @@ button {
   .learning-flow,
   .mission-board,
   .insight-grid,
-  .answer-example-grid {
+  .answer-example-grid,
+  .presentation-flow,
+  .takeaway-grid,
+  .answer-map-row {
     grid-template-columns: 1fr;
   }
 

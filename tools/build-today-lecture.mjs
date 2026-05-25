@@ -352,6 +352,7 @@ function existingLectureExtras() {
         lecture.id,
         {
           answerExample: lecture.answerExample,
+          presentationSummary: lecture.presentationSummary,
           reportSummary: lecture.reportSummary,
         },
       ]),
@@ -391,6 +392,7 @@ async function main() {
       solution: solutionFor(theme, survey, cadastral),
       ...(extras.reportSummary ? { reportSummary: extras.reportSummary } : {}),
       ...(extras.answerExample ? { answerExample: extras.answerExample } : {}),
+      ...(extras.presentationSummary ? { presentationSummary: extras.presentationSummary } : {}),
     });
     if (lectures.length === 10) break;
   }
