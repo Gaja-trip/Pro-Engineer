@@ -3,6 +3,92 @@ document.addEventListener("DOMContentLoaded", () => {
   const modules = window.CURRICULUM_MODULES ?? [];
   const list = document.querySelector("[data-module-list]");
   const detail = document.querySelector("[data-module-detail]");
+  let zoomScale = 1;
+
+  function ensureImageViewer() {
+    let viewer = document.querySelector("[data-image-viewer]");
+    if (viewer) {
+      return viewer;
+    }
+
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `
+        <div class="image-viewer" data-image-viewer aria-hidden="true">
+          <div class="image-viewer-backdrop" data-image-viewer-action="close"></div>
+          <section class="image-viewer-panel" role="dialog" aria-modal="true" aria-label="이미지 확대 보기">
+            <header class="image-viewer-header">
+              <div>
+                <span>이미지 확대 보기</span>
+                <h3 data-image-viewer-title></h3>
+              </div>
+              <div class="image-viewer-controls">
+                <button type="button" data-image-viewer-action="zoom-out" aria-label="이미지 축소">−</button>
+                <button type="button" data-image-viewer-action="reset">100%</button>
+                <button type="button" data-image-viewer-action="zoom-in" aria-label="이미지 확대">+</button>
+                <button type="button" data-image-viewer-action="close">닫기</button>
+              </div>
+            </header>
+            <div class="image-viewer-stage">
+              <img data-image-viewer-img alt="">
+            </div>
+          </section>
+        </div>
+      `,
+    );
+
+    viewer = document.querySelector("[data-image-viewer]");
+    viewer.addEventListener("click", (event) => {
+      const actionButton = event.target.closest("[data-image-viewer-action]");
+      if (!actionButton) {
+        return;
+      }
+      const action = actionButton.dataset.imageViewerAction;
+      if (action === "close") closeImageViewer();
+      if (action === "zoom-in") setImageZoom(zoomScale + 0.25);
+      if (action === "zoom-out") setImageZoom(zoomScale - 0.25);
+      if (action === "reset") setImageZoom(1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && viewer.classList.contains("open")) {
+        closeImageViewer();
+      }
+    });
+
+    return viewer;
+  }
+
+  function setImageZoom(nextScale) {
+    const viewer = ensureImageViewer();
+    const image = viewer.querySelector("[data-image-viewer-img]");
+    const resetButton = viewer.querySelector('[data-image-viewer-action="reset"]');
+    zoomScale = Math.min(3, Math.max(0.5, nextScale));
+    image.style.width = `${Math.round(zoomScale * 100)}%`;
+    resetButton.textContent = `${Math.round(zoomScale * 100)}%`;
+  }
+
+  function openImageViewer(src, alt, title) {
+    const viewer = ensureImageViewer();
+    const image = viewer.querySelector("[data-image-viewer-img]");
+    viewer.querySelector("[data-image-viewer-title]").textContent = title;
+    image.src = src;
+    image.alt = alt;
+    viewer.classList.add("open");
+    viewer.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    setImageZoom(1);
+  }
+
+  function closeImageViewer() {
+    const viewer = document.querySelector("[data-image-viewer]");
+    if (!viewer) {
+      return;
+    }
+    viewer.classList.remove("open");
+    viewer.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+  }
 
   function renderDemLesson(lesson) {
     if (!lesson) {
@@ -18,7 +104,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <p class="presentation-subtitle">${app.escapeHTML(lesson.subtitle)}</p>
 
         <figure class="dem-infographic">
-          <img src="${app.escapeHTML(lesson.image)}" alt="DEM의 개념, 종류, 생성 과정, 활용 사례를 정리한 인포그래픽">
+          <button class="image-zoom-trigger" type="button" data-zoom-src="${app.escapeHTML(lesson.image)}" data-zoom-title="${app.escapeHTML(lesson.title)}" data-zoom-alt="DEM의 개념, 종류, 생성 과정, 활용 사례를 정리한 인포그래픽">
+            <img src="${app.escapeHTML(lesson.image)}" alt="DEM의 개념, 종류, 생성 과정, 활용 사례를 정리한 인포그래픽">
+            <span>크게 보기</span>
+          </button>
           <figcaption>${app.escapeHTML(lesson.keyMessage)}</figcaption>
         </figure>
 
@@ -187,6 +276,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (button) {
         selectModule(button.dataset.moduleId);
       }
+    });
+
+    detail.addEventListener("click", (event) => {
+      const trigger = event.target.closest("[data-zoom-src]");
+      if (!trigger) {
+        return;
+      }
+      openImageViewer(trigger.dataset.zoomSrc, trigger.dataset.zoomAlt, trigger.dataset.zoomTitle);
     });
 
     const hashModule = window.location.hash.replace("#", "");
