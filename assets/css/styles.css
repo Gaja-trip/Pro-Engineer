@@ -732,6 +732,118 @@ button {
   color: var(--sage);
 }
 
+.dem-lesson {
+  margin-top: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
+  padding: 18px;
+}
+
+.dem-infographic {
+  margin: 18px 0 16px;
+  border: 1px solid #c7d3df;
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 12px;
+}
+
+.dem-infographic img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.dem-infographic figcaption {
+  margin-top: 10px;
+  color: var(--sage);
+  font-weight: 900;
+  line-height: 1.55;
+}
+
+.dem-concept-grid,
+.dem-answer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.dem-concept-card,
+.dem-answer-card,
+.dem-answer-example {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.dem-concept-card b {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--sage);
+}
+
+.dem-concept-card p,
+.dem-process-card p,
+.dem-answer-example p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.dem-process-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.dem-process-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.38fr);
+  gap: 14px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.dem-process-card h4,
+.dem-answer-card h4 {
+  margin: 0 0 8px;
+}
+
+.dem-process-card aside {
+  border-left: 4px solid var(--sage);
+  border-radius: var(--radius);
+  background: #eef7f3;
+  padding: 12px;
+  color: var(--ink);
+  font-weight: 900;
+  line-height: 1.55;
+}
+
+.dem-answer-card ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.dem-answer-card li {
+  margin: 6px 0;
+}
+
+.dem-answer-example {
+  margin-top: 14px;
+}
+
+.dem-answer-example b {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--sage);
+}
+
 .bar-list {
   display: grid;
   gap: 12px;
@@ -1281,7 +1393,8 @@ button {
 .lecture-page-content > .basic-lecture,
 .lecture-page-content > .answer-example,
 .lecture-page-content > .presentation-summary,
-.lecture-page-content > .card-news-board {
+.lecture-page-content > .card-news-board,
+.lecture-page-content > .news-digest-board {
   margin-top: 0;
 }
 
@@ -1312,7 +1425,8 @@ button {
 .basic-lecture,
 .answer-example,
 .presentation-summary,
-.card-news-board {
+.card-news-board,
+.news-digest-board {
   margin-top: 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1369,6 +1483,48 @@ button {
   font-size: 13px;
 }
 
+.lecture-content-plan,
+.lecture-materials,
+.basic-knowledge {
+  margin-top: 14px;
+}
+
+.lecture-toc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.lecture-toc-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.lecture-toc-card span {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.lecture-toc-card h4 {
+  margin: 0 0 8px;
+}
+
+.lecture-toc-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 .concept-card-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1404,6 +1560,32 @@ button {
 
 .concept-card li {
   margin: 5px 0;
+}
+
+.lecture-material-list {
+  display: grid;
+  gap: 10px;
+}
+
+.lecture-material-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.34fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.lecture-material-row b {
+  color: var(--sage);
+}
+
+.lecture-material-row p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
 }
 
 .concept-visual {
@@ -1607,6 +1789,46 @@ button {
 .answer-example-section li,
 .insight-grid li {
   margin: 6px 0;
+}
+
+.answer-keyword-panel,
+.answer-outline-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.answer-keyword-panel b,
+.answer-outline-panel b {
+  color: var(--sage);
+}
+
+.answer-keyword-panel div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.answer-keyword-panel span {
+  border: 1px solid #c7d3df;
+  border-radius: 999px;
+  background: #f8fafc;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.answer-outline-panel ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.answer-outline-panel li {
+  margin: 5px 0;
 }
 
 .comparison-table {
@@ -1949,6 +2171,246 @@ button {
   font-weight: 900;
 }
 
+.news-digest-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+  gap: 18px;
+  align-items: stretch;
+  border: 1px solid #c7d3df;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+  padding: 18px;
+}
+
+.news-digest-hero h4 {
+  margin: 0 0 10px;
+  font-size: 24px;
+  line-height: 1.35;
+}
+
+.news-digest-hero p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.news-digest-scan {
+  display: grid;
+  gap: 10px;
+}
+
+.news-digest-scan span {
+  display: grid;
+  place-items: center start;
+  min-height: 56px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 12px 14px;
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.news-digest-scan span:nth-child(1) {
+  border-left: 6px solid #3b82f6;
+}
+
+.news-digest-scan span:nth-child(2) {
+  border-left: 6px solid #f59e0b;
+}
+
+.news-digest-scan span:nth-child(3) {
+  border-left: 6px solid var(--sage);
+}
+
+.news-digest-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.news-digest-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 16px;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.07);
+}
+
+.news-digest-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.news-digest-meta span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #f8fafc;
+  padding: 6px 9px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.news-digest-card h4 {
+  margin: 0 0 10px;
+  font-size: 19px;
+  line-height: 1.35;
+}
+
+.news-digest-card p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.news-digest-point {
+  display: grid;
+  gap: 6px;
+  margin-top: auto;
+  border: 1px solid #c7d3df;
+  border-radius: var(--radius);
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.news-digest-point b {
+  color: var(--sage);
+}
+
+.news-digest-point span {
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.news-digest-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.news-digest-card a {
+  align-self: flex-start;
+  color: var(--sage);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.news-digest-card a:hover {
+  text-decoration: underline;
+}
+
+.news-answer-map {
+  margin-top: 14px;
+}
+
+.news-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.32fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.news-detail-sidebar,
+.news-detail-main {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 18px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+}
+
+.news-detail-sidebar {
+  position: sticky;
+  top: 88px;
+}
+
+.news-source-list {
+  display: grid;
+  gap: 10px;
+}
+
+.news-source-link {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
+  padding: 12px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.news-source-link.active {
+  border-color: var(--sage);
+  background: #eef7f3;
+}
+
+.news-source-link span,
+.news-source-link small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.news-source-link b {
+  line-height: 1.45;
+}
+
+.news-detail-main h2 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.35;
+}
+
+.news-detail-section {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
+  padding: 18px;
+}
+
+.news-detail-section h3 {
+  margin: 0 0 12px;
+}
+
+.news-detail-section p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.expanded-note-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.expanded-note-grid section {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.expanded-note-grid b {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--sage);
+}
+
+.expanded-note-grid p {
+  margin: 0;
+}
+
 .mission-board {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2025,6 +2487,7 @@ button {
   .solution-workspace,
   .support-layout,
   .qna-layout,
+  .news-detail-layout,
   .solution-grid,
   .qnet-source-panel,
   .lecture-workspace,
@@ -2045,19 +2508,29 @@ button {
     position: static;
   }
 
+  .news-detail-sidebar {
+    position: static;
+  }
+
   .metric-grid,
   .card-grid,
   .learning-flow,
+  .dem-concept-grid,
+  .dem-answer-grid,
   .mission-board,
   .insight-grid,
   .answer-example-grid,
   .basic-hero,
+  .lecture-toc-grid,
   .concept-card-grid,
   .knowledge-grid,
   .presentation-flow,
   .takeaway-grid,
   .card-news-hero,
   .card-news-grid,
+  .news-digest-hero,
+  .news-digest-grid,
+  .expanded-note-grid,
   .hub-quick-grid,
   .board-metrics,
   .concept-card-grid,
@@ -2090,17 +2563,24 @@ button {
   .metric-grid,
   .card-grid,
   .learning-flow,
+  .dem-concept-grid,
+  .dem-answer-grid,
   .mission-board,
   .insight-grid,
   .answer-example-grid,
   .basic-hero,
+  .lecture-toc-grid,
   .concept-card-grid,
   .knowledge-grid,
+  .lecture-material-row,
   .concept-card,
   .presentation-flow,
   .takeaway-grid,
   .card-news-hero,
   .card-news-grid,
+  .news-digest-hero,
+  .news-digest-grid,
+  .expanded-note-grid,
   .hub-quick-grid,
   .board-metrics,
   .concept-card-grid,
@@ -2108,6 +2588,10 @@ button {
   .resource-row,
   .qna-item,
   .answer-map-row {
+    grid-template-columns: 1fr;
+  }
+
+  .dem-process-card {
     grid-template-columns: 1fr;
   }
 

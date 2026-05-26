@@ -14,6 +14,31 @@ document.addEventListener("DOMContentLoaded", () => {
     return items.map((item) => `<li>${app.escapeHTML(item)}</li>`).join("");
   }
 
+  function answerKeywordsFor(lecture) {
+    const sectionWords = (lecture.answerExample?.sections ?? []).map((section) => section.heading.replace(/^\d+\.\s*/, ""));
+    return [...new Set([...(lecture.keywords ?? []), ...sectionWords])].slice(0, 10);
+  }
+
+  function summaryFor(lecture) {
+    if (lecture.reportSummary) {
+      return lecture.reportSummary;
+    }
+
+    return {
+      title: `${lecture.title} 핵심정리`,
+      corePoints: [
+        lecture.overlapReason,
+        `${lecture.title}는 측량 및 지형공간정보기술사의 기술적 정확도와 지적기술사의 권리·공시 안정성이 만나는 주제다.`,
+        "답안은 정의에서 시작해 제도·기술·성과검증·활용효과 순서로 전개하면 안정적이다.",
+      ],
+      causes: (lecture.solution.steps ?? []).map((step) => step.replace(/^\d+\.\s*/, "")),
+      effects: [
+        lecture.solution.fieldLink,
+        "현장 사례, 정부 정책, 품질관리 기준을 결론에 연결하면 답안의 현실성이 높아진다.",
+      ],
+    };
+  }
+
   function renderReportSummary(summary) {
     if (!summary) {
       return "";
@@ -29,32 +54,38 @@ document.addEventListener("DOMContentLoaded", () => {
           ${renderBullets(summary.corePoints)}
         </ul>
 
-        <div class="comparison-table" aria-label="지형도와 지적도 비교">
-          <div class="comparison-row comparison-head">
-            <b>구분</b>
-            <b>지형도</b>
-            <b>지적도</b>
-          </div>
-          ${(summary.comparison ?? [])
-            .map(
-              (row) => `
-                <div class="comparison-row">
-                  <b>${app.escapeHTML(row.label)}</b>
-                  <span>${app.escapeHTML(row.topographic)}</span>
-                  <span>${app.escapeHTML(row.cadastral)}</span>
+        ${
+          summary.comparison
+            ? `
+              <div class="comparison-table" aria-label="핵심 비교">
+                <div class="comparison-row comparison-head">
+                  <b>구분</b>
+                  <b>지형도</b>
+                  <b>지적도</b>
                 </div>
-              `,
-            )
-            .join("")}
-        </div>
+                ${(summary.comparison ?? [])
+                  .map(
+                    (row) => `
+                      <div class="comparison-row">
+                        <b>${app.escapeHTML(row.label)}</b>
+                        <span>${app.escapeHTML(row.topographic)}</span>
+                        <span>${app.escapeHTML(row.cadastral)}</span>
+                      </div>
+                    `,
+                  )
+                  .join("")}
+              </div>
+            `
+            : ""
+        }
 
         <div class="insight-grid">
           <div>
-            <h4>주요 원인</h4>
+            <h4>${summary.comparison ? "주요 원인" : "목차 프레임"}</h4>
             <ul>${renderBullets(summary.causes)}</ul>
           </div>
           <div>
-            <h4>현장 영향</h4>
+            <h4>${summary.comparison ? "현장 영향" : "답안 연결"}</h4>
             <ul>${renderBullets(summary.effects)}</ul>
           </div>
         </div>
@@ -62,16 +93,30 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  function renderAnswerExample(example) {
+  function renderAnswerExample(lecture) {
+    const example = lecture.answerExample;
     if (!example) {
       return "";
     }
+    const keywords = answerKeywordsFor(lecture);
 
     return `
       <section class="answer-example">
         <div class="detail-heading">
           <span>답안 예시</span>
           <h3>${app.escapeHTML(example.title)}</h3>
+        </div>
+        <div class="answer-keyword-panel">
+          <b>답안 키워드</b>
+          <div>
+            ${keywords.map((keyword) => `<span>${app.escapeHTML(keyword)}</span>`).join("")}
+          </div>
+        </div>
+        <div class="answer-outline-panel">
+          <b>작성 순서</b>
+          <ol>
+            ${(lecture.solution.steps ?? []).map((step) => `<li>${app.escapeHTML(step.replace(/^\d+\.\s*/, ""))}</li>`).join("")}
+          </ol>
         </div>
         <p class="answer-opening">${app.escapeHTML(example.opening)}</p>
         <div class="answer-example-grid">
@@ -95,6 +140,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!lecture) {
       return "";
     }
+    const lectureToc = lecture.toc ?? [
+      ...(lecture.flow ?? []).map((item) => ({ title: item.label, detail: item.text })),
+      ...(lecture.concepts ?? []).slice(0, 3).map((concept) => ({ title: concept.title, detail: concept.summary })),
+    ].slice(0, 7);
+    const lectureMaterials = lecture.materials ?? [
+      { title: "강의 도입 자료", text: lecture.lead },
+      ...(lecture.concepts ?? []).map((concept) => ({
+        title: `${concept.kicker}: ${concept.title}`,
+        text: `${concept.summary} 핵심어는 ${(concept.points ?? []).join(", ")}이다.`,
+      })),
+      { title: "답안 전환 자료", text: lecture.memoryLine },
+    ].slice(0, 7);
 
     return `
       <section class="basic-lecture">
@@ -120,6 +177,26 @@ document.addEventListener("DOMContentLoaded", () => {
                   </div>
                 `,
               )
+            .join("")}
+          </div>
+        </div>
+
+        <div class="lecture-content-plan">
+          <div class="detail-heading compact">
+            <span>강의 목차</span>
+            <h3>문제 풀이 전에 다룰 순서</h3>
+          </div>
+          <div class="lecture-toc-grid">
+            ${lectureToc
+              .map(
+                (item, index) => `
+                  <section class="lecture-toc-card">
+                    <span>${String(index + 1).padStart(2, "0")}</span>
+                    <h4>${app.escapeHTML(item.title)}</h4>
+                    <p>${app.escapeHTML(item.detail)}</p>
+                  </section>
+                `,
+              )
               .join("")}
           </div>
         </div>
@@ -142,6 +219,25 @@ document.addEventListener("DOMContentLoaded", () => {
               `,
             )
             .join("")}
+        </div>
+
+        <div class="lecture-materials">
+          <div class="detail-heading compact">
+            <span>강의자료 구성</span>
+            <h3>수업에서 설명하면 좋은 자료 묶음</h3>
+          </div>
+          <div class="lecture-material-list">
+            ${lectureMaterials
+              .map(
+                (item) => `
+                  <section class="lecture-material-row">
+                    <b>${app.escapeHTML(item.title)}</b>
+                    <p>${app.escapeHTML(item.text)}</p>
+                  </section>
+                `,
+              )
+              .join("")}
+          </div>
         </div>
 
         <div class="basic-knowledge">
@@ -296,6 +392,77 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
 
         <p class="card-news-closing">${app.escapeHTML(news.closing)}</p>
+      </section>
+    `;
+  }
+
+  function renderNewsDigest(digest) {
+    if (!digest) {
+      return "";
+    }
+
+    return `
+      <section class="news-digest-board">
+        <div class="detail-heading">
+          <span>정부·언론 현장자료</span>
+          <h3>${app.escapeHTML(digest.title)}</h3>
+        </div>
+        <p class="presentation-subtitle">${app.escapeHTML(digest.subtitle)}</p>
+
+        <div class="news-digest-hero">
+          <div>
+            <span class="card-news-label">크롤링 요약</span>
+            <h4>${app.escapeHTML(digest.headline)}</h4>
+            <p>${app.escapeHTML(digest.context)}</p>
+          </div>
+          <div class="news-digest-scan" aria-hidden="true">
+            <span>정부 보도자료</span>
+            <span>신문 기사</span>
+            <span>답안 포인트</span>
+          </div>
+        </div>
+
+        <div class="news-digest-grid">
+          ${(digest.sources ?? [])
+            .map(
+              (source, index) => `
+                <article class="news-digest-card">
+                  <div class="news-digest-meta">
+                    <span>${app.escapeHTML(source.type)}</span>
+                    <span>${app.escapeHTML(source.date)}</span>
+                  </div>
+                  <h4>${app.escapeHTML(source.title)}</h4>
+                  <p>${app.escapeHTML(source.summary)}</p>
+                  <div class="news-digest-point">
+                    <b>답안 연결</b>
+                    <span>${app.escapeHTML(source.answerPoint)}</span>
+                  </div>
+                  <div class="news-digest-actions">
+                    <a href="news-detail.html?topic=${app.escapeHTML(digest.id)}&source=${index}">자료 정리 보기</a>
+                    <a href="${app.escapeHTML(source.url)}" target="_blank" rel="noopener">원문 보기</a>
+                  </div>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="answer-map news-answer-map">
+          <div class="detail-heading compact">
+            <span>서술 활용</span>
+            <h3>보도자료를 답안 문장으로 바꾸는 포인트</h3>
+          </div>
+          ${(digest.writeTips ?? [])
+            .map(
+              (tip) => `
+                <div class="answer-map-row">
+                  <b>${app.escapeHTML(tip.part)}</b>
+                  <span>${app.escapeHTML(tip.write)}</span>
+                </div>
+              `,
+            )
+            .join("")}
+        </div>
       </section>
     `;
   }
@@ -753,20 +920,393 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   };
 
+  const newsDigestsById = {
+    "cadastral-resurvey": {
+      title: "현장뉴스: 지적재조사와 경계 불부합",
+      subtitle: "지적재조사를 정책, 예산, 민간참여, 주민 재산권 보호의 관점으로 연결합니다.",
+      headline: "디지털 지적 전환은 경계 불부합 해소와 스마트국토 기반 구축을 동시에 겨냥한다.",
+      context: "정부자료와 언론보도는 지적재조사를 단순 경계정리 사업이 아니라 디지털 수치좌표 전환, 민관 협력, 드론·AI 활용, 토지재산권 보호 사업으로 설명하고 있습니다.",
+      sources: [
+        {
+          type: "정부 정책자료",
+          date: "2021.02.26",
+          title: "지적재조사 기본계획 수정계획과 디지털지적 전환",
+          summary: "국토교통부는 지적재조사를 종이지적에서 디지털 수치좌표 지적으로 전환하는 중장기 과제로 제시하고, 사업절차 간소화와 드론·AI 신기술 활용 방향을 함께 제시했습니다.",
+          answerPoint: "개요에서 '지적재조사는 도해지적의 한계를 좌표 기반으로 정비하는 디지털 국토관리 사업'이라고 쓰기 좋습니다.",
+          url: "https://www.korea.kr/news/policyNewsView.do?newsId=148884447",
+        },
+        {
+          type: "신문 기사",
+          date: "2025.02.17",
+          title: "2025년 지적재조사사업 착수와 민간 참여 확대",
+          summary: "뉴시스는 2025년 지적재조사사업이 전국 156개 지자체, 381개 사업지구, 16만6000필지 규모로 추진되고 민간업체 참여비율이 확대됐다고 보도했습니다.",
+          answerPoint: "현황 파트에서 '재조사 수요가 전국 단위로 지속되고 민간 측량역량과의 협업이 중요해졌다'는 근거로 활용합니다.",
+          url: "https://www.newsis.com/view/NISX20250216_0003066864",
+        },
+      ],
+      writeTips: [
+        { part: "개요", write: "지적재조사는 낡은 도해지적을 좌표 기반 디지털 지적으로 전환해 경계분쟁과 행정오류를 줄이는 사업이다." },
+        { part: "현황", write: "최근 사업은 대규모 사업지구와 민간참여 확대를 통해 속도와 전문성을 동시에 확보하는 방향으로 추진된다." },
+        { part: "결론", write: "성과검증, 주민협의, 데이터 갱신체계를 결합해야 스마트시티·자율주행·디지털트윈의 기초자료로 확장될 수 있다." },
+      ],
+    },
+    "spatial-law": {
+      title: "현장뉴스: 공간정보법과 측량 성과의 효력",
+      subtitle: "공공측량 성과심사와 지적측량성과검사를 법적 효력·공정성·품질관리 관점으로 정리합니다.",
+      headline: "측량 성과의 효력은 법정 절차, 성과심사, 검사기준, 책임기관의 공정성에서 나온다.",
+      context: "공간정보법 관련 자료는 성과심사 세부항목을 구체화하고 있으며, 언론 보도는 성과심사 업무의 공정성과 전문기관 역할을 쟁점으로 다룹니다.",
+      sources: [
+        {
+          type: "법령·정부자료",
+          date: "현행 기준",
+          title: "공공측량 성과심사 세부항목 및 판정기준",
+          summary: "국가법령정보센터의 성과심사 기준은 기초자료 적정성, 완전성, 논리일관성, 위치정확성, 주제정확성, 메타데이터 누락 여부 등을 검사 항목으로 제시합니다.",
+          answerPoint: "성과심사 절차 설명에서 '정확도뿐 아니라 완전성·논리일관성·메타데이터까지 보는 종합 품질심사'로 정리합니다.",
+          url: "https://www.law.go.kr/LSW/flDownload.do?bylClsCd=200201&flNm=%5B%EB%B3%84%ED%91%9C+3%5D+%EA%B3%B5%EA%B3%B5%EC%B8%A1%EB%9F%89+%EC%84%B1%EA%B3%BC%EC%8B%AC%EC%82%AC+%EC%84%B8%EB%B6%80%ED%95%AD%EB%AA%A9+%EB%B0%8F+%ED%8C%90%EC%A0%95%EA%B8%B0%EC%A4%80&flSeq=151295087",
+        },
+        {
+          type: "정책 해명자료",
+          date: "2015.06.16",
+          title: "공공측량 성과심사 별도기구 신설 논란 관련",
+          summary: "정책브리핑 자료는 민간단체 위탁 방식의 공정성 우려와 성과심사 업무 개선 필요성을 설명합니다.",
+          answerPoint: "문제점과 개선방안에서 '심사기관의 독립성·전문성·책임성 강화'를 제도개선 키워드로 제시합니다.",
+          url: "https://m.korea.kr/briefing/pressReleaseView.do?endDate=2019-12-03&newsId=156058297&pageIndex=4807&repCode=&repCodeType=&srchWord=&startDate=2008-02-29",
+        },
+      ],
+      writeTips: [
+        { part: "정의", write: "공공측량은 공공사업과 국민 안전에 영향을 미치므로 성과의 법적 효력은 성과심사 통과와 표준 준수에서 확보된다." },
+        { part: "문제점", write: "성과심사가 형식화되거나 책임기관이 불명확하면 공공자료의 신뢰성과 사업 간 호환성이 약화된다." },
+        { part: "개선", write: "전자심사, 자동검증, 독립 품질관리기관, 사후관리 의무화를 함께 제안하면 고득점 구조가 된다." },
+      ],
+    },
+    "control-point": {
+      title: "현장뉴스: 국가기준점과 지적측량 기준",
+      subtitle: "기준점은 공공데이터, 지자체 점검, 토지경계 분쟁 예방으로 연결됩니다.",
+      headline: "작은 기준점 표지는 국가 좌표체계, 지적측량, 자율주행·드론 산업의 공통 기준이다.",
+      context: "정부 개방자료는 국가기준점의 종류와 관리부서를 보여주고, 지역 언론은 기준점 훼손·망실 점검이 지적행정 신뢰와 바로 연결된다는 현장성을 보여줍니다.",
+      sources: [
+        {
+          type: "정부 공공데이터",
+          date: "2025.04.28",
+          title: "국토교통부 국토지리정보원_국가기준점",
+          summary: "공공데이터포털은 위성기준점, 통합기준점, 수준점, 중력점, 삼각점 등 국가기준점 정보를 국토지리정보원 자료로 제공합니다.",
+          answerPoint: "기준점 종류와 역할을 쓸 때 '국가기준점은 위치·표고 등 측량 기준성과를 제공하는 국가 인프라'로 연결합니다.",
+          url: "https://www.data.go.kr/data/15015480/fileData.do?recommendDataYn=Y",
+        },
+        {
+          type: "신문 기사",
+          date: "2024.04.02",
+          title: "강서구 지적측량 기준점 일제조사",
+          summary: "한국경제는 강서구가 지적기준점, 국가기준점, 도시기준점 등 2천여 점을 조사해 망실·훼손 기준점을 복구·폐기한다고 보도했습니다.",
+          answerPoint: "현장관리 파트에서 '기준점 유지관리는 정확도 확보와 토지경계 분쟁 예방의 출발점'이라는 문장으로 활용합니다.",
+          url: "https://www.hankyung.com/article/202404023377Y",
+        },
+      ],
+      writeTips: [
+        { part: "개요", write: "국가기준점은 모든 측량성과를 동일 좌표체계로 연결하는 기준 인프라다." },
+        { part: "현장 문제", write: "도로굴착, 공사, 노후화로 기준점이 훼손되면 지적측량 성과의 재현성과 신뢰성이 낮아진다." },
+        { part: "대책", write: "정기조사, 기준점 DB 갱신, 주민 신고, GNSS 기준망 연계를 종합관리 체계로 제시한다." },
+      ],
+    },
+    "coordinate-system": {
+      title: "현장뉴스: 세계측지계·좌표계·좌표변환",
+      subtitle: "세계측지계와 좌표변환은 지적측량 검사, RTK, 공간정보 통합의 공통 언어입니다.",
+      headline: "좌표계 전환은 단순 계산이 아니라 지적·공공측량·도시 인프라 데이터를 같은 기준으로 맞추는 일이다.",
+      context: "서울시 GNSS 서비스는 세계측지계 이행과 신구좌표계 변환, 네트워크 RTK 도입을 지적측량 검사 확대와 시설물 변위감시에 연결합니다.",
+      sources: [
+        {
+          type: "지자체 공공서비스",
+          date: "상시 운영",
+          title: "서울특별시 GNSS 측위서비스",
+          summary: "서울시는 세계측지계 이행을 위한 신구좌표계 변환과 네트워크 RTK 기술을 지적측량 검사, 시설물 변위감시 등에 활용하고 있습니다.",
+          answerPoint: "좌표변환 필요성을 '과거 자료와 최신 GNSS 성과를 같은 기준으로 통합하기 위한 절차'로 설명합니다.",
+          url: "https://gnss.eseoul.go.kr/service",
+        },
+        {
+          type: "정부 홍보자료",
+          date: "2025",
+          title: "국토지리정보원 2025 리플릿",
+          summary: "국토지리정보원 자료는 세계측지계, 국가기준점, 공공측량 등 위치기준 업무가 국가 공간정보의 기반임을 소개합니다.",
+          answerPoint: "결론에서 '세계측지계 기반 기준성과 관리가 공공·민간 공간정보의 상호운용성을 높인다'고 정리합니다.",
+          url: "https://www.ngii.go.kr/lib/file/2025_KOR-%EA%B5%AD%ED%86%A0%EC%A7%80%EB%A6%AC%EC%A0%95%EB%B3%B4%EC%9B%90%20%EB%A6%AC%ED%94%8C%EB%A6%BF-%EC%9B%B9%EC%9A%A9%28%EA%B3%A0%ED%95%B4%EC%83%81%29.pdf",
+        },
+      ],
+      writeTips: [
+        { part: "개요", write: "좌표계는 위치를 표현하는 약속이며, 세계측지계 전환은 GNSS 시대의 국가 위치기준 정비다." },
+        { part: "오차", write: "변환계수, 공통점 품질, 원도 오차, 투영 왜곡이 좌표변환 성과의 주요 오차요인이다." },
+        { part: "검증", write: "공통점 잔차, 기준점 검측, 메타데이터 기록을 통해 변환성과의 추적성을 확보해야 한다." },
+      ],
+    },
+    "gnss-cadastre": {
+      title: "현장뉴스: GNSS·RTK 기반 위치 결정",
+      subtitle: "고정밀 위치결정은 지적측량, 자율주행, 드론, 시설물 모니터링의 공통 기반입니다.",
+      headline: "GNSS RTK는 빠른 현장성과 cm급 정확도를 제공하지만 기준국·통신·검증 체계가 함께 작동해야 한다.",
+      context: "서울시 네트워크 RTK 자료와 산업계 초정밀측위 서비스는 RTK가 공공측량을 넘어 자율주행·드론·시설물 모니터링까지 확장되는 흐름을 보여줍니다.",
+      sources: [
+        {
+          type: "지자체 공공서비스",
+          date: "상시 운영",
+          title: "서울특별시 멀티 GNSS 네트워크 RTK",
+          summary: "서울시는 5개 GNSS 위성기준점과 네트워크 RTK 시스템을 통해 지적측량 검사 확대, 도심 고정밀 측위, 시설물 변위감시 기반을 운영하고 있습니다.",
+          answerPoint: "현장 적용 절차에서 '기준국망, 보정정보, Fix 상태, 검사점 검증'을 함께 제시합니다.",
+          url: "https://gnss.eseoul.go.kr/service",
+        },
+        {
+          type: "산업 서비스 자료",
+          date: "상시 제공",
+          title: "RTK 초정밀측위 서비스",
+          summary: "민간 통신 기반 RTK 서비스는 GNSS 오차를 줄여 cm급 위치정보를 제공하고, 스마트모빌리티·산업현장 위치관리 수요와 연결됩니다.",
+          answerPoint: "결론에서 '고정밀 측위 수요가 공공측량에서 스마트모빌리티·IoT 산업으로 확장된다'고 서술합니다.",
+          url: "https://www.biz.lgu.kr/rtk",
+        },
+      ],
+      writeTips: [
+        { part: "원리", write: "RTK는 기준국과 이동국의 동시 관측값을 이용해 위성·대기·시계 오차를 보정하는 상대측위 방식이다." },
+        { part: "한계", write: "도심 차폐, 멀티패스, 통신 지연, 기준국 이상은 정확도 저하와 오측위의 원인이 된다." },
+        { part: "대책", write: "반복관측, 기준점 검측, 품질지표 확인, 현장 장애물 기록을 성과검증 절차에 포함한다." },
+      ],
+    },
+    "three-dimensional-cadastre": {
+      title: "현장뉴스: 3차원 지적과 입체 공간정보",
+      subtitle: "3D 건물모형, 지하공간통합지도, 디지털트윈 플랫폼을 입체지적 답안의 근거로 정리합니다.",
+      headline: "3차원 공간정보는 도시를 보여주는 시각화 자료를 넘어 침수예측, 드론길, 인허가, 안전관리에 쓰이는 정책 인프라다.",
+      context: "국토교통부 보도자료는 전국 건축물 3차원 모형 제공과 디지털트윈 활용을 강조하고, 최근 언론은 K-GeoP·V-World 기반 디지털트윈 플랫폼 확산을 다룹니다.",
+      sources: [
+        {
+          type: "정부 보도자료",
+          date: "2021.06.29",
+          title: "전국 건축물 3차원 건물 모형 서비스",
+          summary: "국토교통부는 약 1,900만 동 건축물의 1단계 수준 3차원 건물 모형 구축을 완료하고, 드론길·침수예측·경관분석 등 활용을 제시했습니다.",
+          answerPoint: "3차원 지적의 필요성을 '평면 경계에서 높이·객체·권리정보를 포함하는 입체관리로 확장'하는 근거로 사용합니다.",
+          url: "https://m.korea.kr/briefing/pressReleaseView.do?endDate=2021-06-30&newsId=156458820&pageIndex=1&repCode=&repCodeType=&srchWord=%EC%8A%A4%EB%A7%88%ED%8A%B8&startDate=2008-02-29",
+        },
+        {
+          type: "신문 기사",
+          date: "2026.04.27",
+          title: "디지털 트윈국토 플랫폼 권역별 현장간담회",
+          summary: "머니투데이는 국토부가 K-GeoP, V-World, 공장인허가 사전진단서비스 등을 소개하며 지방정부 활용사례와 제도개선 의견을 논의한다고 보도했습니다.",
+          answerPoint: "활용효과에서 '3D 공간정보가 행정 의사결정과 시뮬레이션 플랫폼으로 확장된다'고 씁니다.",
+          url: "https://www.mt.co.kr/amp/estate/2026/04/27/2026042707242968285",
+        },
+      ],
+      writeTips: [
+        { part: "필요성", write: "지상·지하·실내 권리가 중첩되는 도시에서는 2D 필지 경계만으로 권리와 시설 안전을 설명하기 어렵다." },
+        { part: "구축", write: "3D 건물모형, 지하공간통합지도, BIM-GIS 연계, LoD 기준을 함께 제시한다." },
+        { part: "활용", write: "침수예측, 경관분석, 드론길, 공장 인허가 사전진단을 입체공간정보 활용사례로 넣는다." },
+      ],
+    },
+    "spatial-standard-quality": {
+      title: "현장뉴스: 공간정보 표준과 품질관리",
+      subtitle: "국제표준, 디지털트윈 표준, 품질검증을 답안의 현실 근거로 연결합니다.",
+      headline: "공간정보 표준은 국내 행정자료를 넘어 국제협력, 민간 활용, 디지털트윈 품질의 전제조건이다.",
+      context: "국토교통부의 ISO/TC 211 총회 자료와 2025년 공간정보 정책사업 자료는 표준개발, 플랫폼 고도화, 데이터 품질관리의 중요성을 반복해서 보여줍니다.",
+      sources: [
+        {
+          type: "정부 보도자료",
+          date: "2023.05.10",
+          title: "공간정보 전문가 한자리에, 국제표준 성과 확산·공유",
+          summary: "국토교통부는 ISO/TC 211 총회를 통해 공간정보 국제표준 논의와 디지털트윈국토, 신기술 활용, 표준 발전포럼을 추진했습니다.",
+          answerPoint: "개요에서 '표준은 기관 간 상호운용성과 국제 경쟁력 확보 수단'이라고 정리합니다.",
+          url: "https://www.molit.go.kr/USR/NEWS/m_71/dtl.jsp?id=95088285&lcmspage=28",
+        },
+        {
+          type: "신문 기사",
+          date: "2023.05.09",
+          title: "공간정보 국제표준 성과 확산·공유",
+          summary: "파이낸셜뉴스는 ISO/TC 211 총회에서 공간정보 표준화 회의, 표준화 사례 발표, 공간정보표준 발전포럼이 진행된다고 보도했습니다.",
+          answerPoint: "개선방안에서 '국내 표준의 국제표준 연계와 민간 참여 확대'를 제안합니다.",
+          url: "https://www.fnnews.com/news/202305091100485988",
+        },
+      ],
+      writeTips: [
+        { part: "정의", write: "공간정보 표준은 좌표계, 데이터모델, 코드, 메타데이터, 품질요소를 통일하는 약속이다." },
+        { part: "품질", write: "완전성, 위치정확도, 논리일관성, 주제정확도, 최신성을 품질관리 항목으로 제시한다." },
+        { part: "정책", write: "디지털트윈국토와 플랫폼 활용을 위해 표준개발, 품질검증 자동화, 메타데이터 의무화를 제안한다." },
+      ],
+    },
+    "uav-cadastre": {
+      title: "현장뉴스: UAV·드론 기반 지형·지적 자료 취득",
+      subtitle: "드론측량 업무규정, 지적재조사, Geo-AI 분석을 UAV 답안의 현장 사례로 정리합니다.",
+      headline: "드론은 빠른 현황 취득 도구이고, 답안에서는 GCP·검사점·성과검증을 붙여야 법정 성과로 설득력이 생긴다.",
+      context: "언론은 지적측량 드론 활용 표준절차와 지자체 드론·위성 활용 사례를 다루고, 2025년 공간정보 정책자료는 드론 영상 AI 분석을 행정서비스로 확장합니다.",
+      sources: [
+        {
+          type: "신문 기사",
+          date: "2023.07.05",
+          title: "지적측량 드론 활용성 높인다",
+          summary: "머니투데이는 국토교통부가 지적측량 등에 드론 활용을 늘리기 위한 드론측량 업무규정을 행정예고했다고 보도했습니다.",
+          answerPoint: "제도 파트에서 '드론 성과를 법정 측량에 쓰려면 표준 업무절차와 정확도 검증 기준이 필요하다'고 연결합니다.",
+          url: "https://www.mt.co.kr/estate/2023/07/05/2023070509172827747",
+        },
+        {
+          type: "정부 보도자료",
+          date: "2025.05.02",
+          title: "2025년 공간정보 정책사업과 드론 영상 AI 분석",
+          summary: "국토교통부 2025년 시행계획은 드론 촬영 영상을 AI가 분석해 불법 건축물이나 쓰레기 투기 의심구역을 찾는 공간정보 자동분석 서비스를 예시로 들었습니다.",
+          answerPoint: "활용효과에서 'UAV 자료는 단순 정사영상 제작을 넘어 Geo-AI 기반 행정 자동분석으로 확장된다'고 씁니다.",
+          url: "https://itskorea.kr/downloadFile.do?fileId=FILE_000000000101521&fileSn=1",
+        },
+      ],
+      writeTips: [
+        { part: "절차", write: "비행계획, GCP 설치, 영상처리, 검사점 정확도 평가, 성과품 제출 순서로 쓴다." },
+        { part: "한계", write: "정사영상은 현황 파악에 유리하지만 법적 경계확정은 지적측량 기준과 현장검증이 필요하다." },
+        { part: "미래", write: "드론 영상과 AI 분석을 결합하면 불법건축물, 재난현장, 지적불부합 탐지에 활용할 수 있다." },
+      ],
+    },
+    nsdi: {
+      title: "현장뉴스: 국가공간정보 인프라와 정책",
+      subtitle: "국가공간정보정책 시행계획, K-GeoP, V-World, Geo-AI를 NSDI 답안의 최신 근거로 정리합니다.",
+      headline: "NSDI는 데이터 구축사업을 넘어 국가행정·민간산업·국민서비스를 연결하는 플랫폼 정책으로 진화하고 있다.",
+      context: "2025년 국가공간정보정책 시행계획과 2026년 현장간담회 자료는 대규모 투자, 플랫폼 고도화, 디지털트윈, Geo-AI, 민간개방을 핵심 흐름으로 제시합니다.",
+      sources: [
+        {
+          type: "정부 보도자료",
+          date: "2025.05.02",
+          title: "2025년 5,800억 원 규모 공간정보 정책사업",
+          summary: "국토교통부는 2025년 국가공간정보정책 시행계획을 통해 1,209개 사업, 약 5,838억 원 규모의 공간정보 정책과 디지털트윈국토, 플랫폼 고도화, Geo-AI 적용 방향을 제시했습니다.",
+          answerPoint: "현황에서 'NSDI 투자가 디지털트윈 구축과 유통·활용 활성화에 집중되고 있다'고 쓸 수 있습니다.",
+          url: "https://itskorea.kr/downloadFile.do?fileId=FILE_000000000101521&fileSn=1",
+        },
+        {
+          type: "신문 기사",
+          date: "2026.04.27",
+          title: "디지털 트윈국토 플랫폼 현장간담회",
+          summary: "머니투데이는 국토부가 전국 5개 권역에서 K-GeoP, V-World, 공장인허가 사전진단 서비스 활용사례를 공유한다고 보도했습니다.",
+          answerPoint: "개선방안에서 '중앙 플랫폼과 지자체 정책지도를 연결해 현장 수요 기반으로 고도화해야 한다'고 제시합니다.",
+          url: "https://www.mt.co.kr/amp/estate/2026/04/27/2026042707242968285",
+        },
+      ],
+      writeTips: [
+        { part: "개요", write: "NSDI는 공간정보의 생산, 표준화, 품질관리, 유통, 활용을 국가 차원에서 통합하는 인프라다." },
+        { part: "정책", write: "K-GeoP와 V-World는 행정용·대민용 플랫폼으로 구분해 쓰고, Geo-AI는 차세대 활용 방향으로 제시한다." },
+        { part: "개선", write: "중복구축 방지, 표준·품질 의무화, 보안심사, 민간 API 확대, 지자체 역량강화를 함께 제안한다." },
+      ],
+    },
+    "boundary-error": {
+      title: "현장뉴스: 오차·정확도·성과 검증",
+      subtitle: "성과심사 기준과 지하공간통합지도 고도화 사례를 오차·정확도 답안에 연결합니다.",
+      headline: "성과검증은 정확도 수치만 확인하는 절차가 아니라 완전성, 일관성, 메타데이터, 현지심사를 포함한 품질관리 체계다.",
+      context: "법령자료는 위치정확성·위상일관성·메타데이터 검사 항목을 제시하고, 국토부 정책자료는 지하공간통합지도 정확도 개선과 위험분석을 추진하고 있습니다.",
+      sources: [
+        {
+          type: "법령·정부자료",
+          date: "현행 기준",
+          title: "공공측량 성과심사 세부항목 및 판정기준",
+          summary: "성과심사 기준은 3차원 지하구조물 데이터의 기준좌표계 적용, 평면·수직 위치 정확성, 인접 정합성, 메타데이터 누락 여부 등을 검토하도록 제시합니다.",
+          answerPoint: "검증 항목에서 '외적 정확성, 내적 정확성, 위상일관성, 메타데이터'를 함께 적어 답안 깊이를 높입니다.",
+          url: "https://www.law.go.kr/LSW/flDownload.do?bylClsCd=200201&flNm=%5B%EB%B3%84%ED%91%9C+3%5D+%EA%B3%B5%EA%B3%B5%EC%B8%A1%EB%9F%89+%EC%84%B1%EA%B3%BC%EC%8B%AC%EC%82%AC+%EC%84%B8%EB%B6%80%ED%95%AD%EB%AA%A9+%EB%B0%8F+%ED%8C%90%EC%A0%95%EA%B8%B0%EC%A4%80&flSeq=151295087",
+        },
+        {
+          type: "정부 보도자료",
+          date: "2025.05.02",
+          title: "지하공간통합지도 고도화와 정확도 개선",
+          summary: "2025년 공간정보 정책사업 자료는 지반침하 이력, 공동정보, 건설공사 정보 등을 연계하고 상·하수도 시설물 실측 예산 지원으로 정확도 개선을 추진한다고 설명합니다.",
+          answerPoint: "개선방안에서 '실측자료 보강, 위험정보 연계, 정확도 검증, 지하공간 안전관리'를 묶어 제시합니다.",
+          url: "https://itskorea.kr/downloadFile.do?fileId=FILE_000000000101521&fileSn=1",
+        },
+      ],
+      writeTips: [
+        { part: "개요", write: "오차관리는 참값과 관측값의 차이를 줄이는 기술적 과정이자 성과 신뢰성을 확보하는 제도적 과정이다." },
+        { part: "검증", write: "RMSE, 허용오차, 검사점, 위상일관성, 메타데이터를 함께 제시하면 단순 수치평가를 넘어 품질관리 답안이 된다." },
+        { part: "정책", write: "지하공간통합지도처럼 안전과 연결된 성과는 실측자료 보강과 지속 갱신이 정확도 확보의 핵심이다." },
+      ],
+    },
+  };
+
+  window.TODAY_NEWS_DIGESTS = newsDigestsById;
+
   function basicLectureFor(lecture) {
     return lecture.basicLecture ?? basicLecturesById[lecture.id];
   }
 
+  function presentationFor(lecture) {
+    if (lecture.presentationSummary) {
+      return lecture.presentationSummary;
+    }
+    const basicLecture = basicLectureFor(lecture);
+    return {
+      title: `${lecture.title} PPT 정리`,
+      subtitle: "강의용 슬라이드로 옮길 때 바로 쓸 수 있는 핵심 흐름입니다.",
+      coreMessage: basicLecture?.coreMessage ?? lecture.overlapReason,
+      flow: (lecture.solution.steps ?? []).map((step, index) => ({
+        label: `Part ${index + 1}`,
+        title: step.replace(/^\d+\.\s*/, ""),
+        text: index === 0 ? "정의와 출제배경을 먼저 제시해 문제의 범위를 잡습니다." : "기술적 절차와 제도적 관리방안을 연결해 답안의 깊이를 만듭니다.",
+      })),
+      takeaways: (basicLecture?.concepts ?? []).slice(0, 4).map((concept, index) => ({
+        slide: String(index + 1),
+        title: concept.title,
+        summary: concept.summary,
+        answerTip: `${concept.kicker}을 답안의 소제목 또는 키워드로 활용합니다.`,
+      })),
+      answerMap: [
+        { part: "도입", write: lecture.overlapReason },
+        { part: "본론", write: (lecture.solution.steps ?? []).map((step) => step.replace(/^\d+\.\s*/, "")).join(" → ") },
+        { part: "결론", write: lecture.solution.closing },
+      ],
+      memoryLine: basicLecture?.memoryLine ?? "암기 문장: 정의, 절차, 검증, 활용을 한 줄로 연결한다.",
+    };
+  }
+
+  function cardNewsFor(lecture) {
+    if (lecture.cardNews) {
+      return lecture.cardNews;
+    }
+    return {
+      title: `${lecture.title} 카드뉴스`,
+      subtitle: "짧은 이미지 카드로 복습할 수 있도록 핵심 개념을 재구성했습니다.",
+      hero: {
+        headline: `${lecture.title}는 정의보다 구조가 먼저다.`,
+        text: "문제를 보면 키워드, 절차, 검증, 정책 활용을 차례로 떠올리면 답안 골격이 빠르게 잡힙니다.",
+        chips: (lecture.keywords ?? []).slice(0, 5),
+      },
+      cards: [
+        {
+          no: "01",
+          kicker: "정의",
+          title: "무엇을 묻는가",
+          caption: lecture.overlapReason,
+          points: (lecture.keywords ?? []).slice(0, 4),
+        },
+        {
+          no: "02",
+          kicker: "절차",
+          title: "답안의 뼈대",
+          caption: "사업 또는 기술 절차를 단계적으로 제시합니다.",
+          points: (lecture.solution.steps ?? []).map((step) => step.replace(/^\d+\.\s*/, "")),
+        },
+        {
+          no: "03",
+          kicker: "검증",
+          title: "기술사다운 마무리",
+          caption: "성과검증, 품질관리, 법제도 개선을 결론에 붙이면 답안 완성도가 높아집니다.",
+          points: ["정확도", "표준", "메타데이터", "사후관리"],
+        },
+      ],
+      closing: lecture.solution.closing,
+    };
+  }
+
+  function newsDigestFor(lecture) {
+    const digest = newsDigestsById[lecture.id];
+    return digest ? { id: lecture.id, ...digest } : null;
+  }
+
   function lecturePages(lecture) {
     const basicLecture = basicLectureFor(lecture);
+    const newsDigest = newsDigestFor(lecture);
+    const summary = summaryFor(lecture);
+    const presentation = presentationFor(lecture);
+    const cardNews = cardNewsFor(lecture);
 
     return [
-      { id: "explanation", label: "답안작성 설명", render: () => renderAnswerWriting(lecture) },
-      ...(lecture.reportSummary ? [{ id: "report", label: "보고서 핵심 정리", render: () => renderReportSummary(lecture.reportSummary) }] : []),
-      ...(basicLecture ? [{ id: "basic", label: "기본강의", render: () => renderBasicLecture(basicLecture) }] : []),
-      ...(lecture.answerExample ? [{ id: "example", label: "답안 예시", render: () => renderAnswerExample(lecture.answerExample) }] : []),
-      ...(lecture.presentationSummary ? [{ id: "presentation", label: "PPT 이해정리", render: () => renderPresentationSummary(lecture.presentationSummary) }] : []),
-      ...(lecture.cardNews ? [{ id: "card-news", label: "카드뉴스", render: () => renderCardNews(lecture.cardNews) }] : []),
+      { id: "explanation", label: "답안작성", render: () => renderAnswerWriting(lecture) },
+      { id: "report", label: "핵심정리", render: () => renderReportSummary(summary) },
+      { id: "basic", label: "기본강의", render: () => renderBasicLecture(basicLecture) },
+      { id: "example", label: "답안예시", render: () => renderAnswerExample(lecture) },
+      { id: "presentation", label: "PPT 정리", render: () => renderPresentationSummary(presentation) },
+      { id: "card-news", label: "카드뉴스", render: () => renderCardNews(cardNews) },
+      { id: "news-digest", label: "보도자료", render: () => renderNewsDigest(newsDigest) },
     ];
   }
 

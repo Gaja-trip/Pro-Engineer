@@ -4,6 +4,82 @@ document.addEventListener("DOMContentLoaded", () => {
   const list = document.querySelector("[data-module-list]");
   const detail = document.querySelector("[data-module-detail]");
 
+  function renderDemLesson(lesson) {
+    if (!lesson) {
+      return "";
+    }
+
+    return `
+      <section class="dem-lesson" aria-labelledby="dem-lesson-title">
+        <div class="detail-heading">
+          <span>DEM 집중 강의</span>
+          <h3 id="dem-lesson-title">${app.escapeHTML(lesson.title)}</h3>
+        </div>
+        <p class="presentation-subtitle">${app.escapeHTML(lesson.subtitle)}</p>
+
+        <figure class="dem-infographic">
+          <img src="${app.escapeHTML(lesson.image)}" alt="DEM의 개념, 종류, 생성 과정, 활용 사례를 정리한 인포그래픽">
+          <figcaption>${app.escapeHTML(lesson.keyMessage)}</figcaption>
+        </figure>
+
+        <div class="dem-concept-grid">
+          ${(lesson.concepts ?? [])
+            .map(
+              (concept) => `
+                <article class="dem-concept-card">
+                  <b>${app.escapeHTML(concept.term)}</b>
+                  <p>${app.escapeHTML(concept.explain)}</p>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="detail-heading compact">
+          <span>제작 방법</span>
+          <h3>실제 DEM 제작 절차</h3>
+        </div>
+        <div class="dem-process-list">
+          ${(lesson.productionSteps ?? [])
+            .map(
+              (item) => `
+                <section class="dem-process-card">
+                  <div>
+                    <h4>${app.escapeHTML(item.step)}</h4>
+                    <p>${app.escapeHTML(item.detail)}</p>
+                  </div>
+                  <aside>${app.escapeHTML(item.answerTip)}</aside>
+                </section>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="detail-heading compact">
+          <span>답안 목차</span>
+          <h3>기술사 답안에 바로 쓰는 구성</h3>
+        </div>
+        <div class="dem-answer-grid">
+          ${(lesson.answerOutline ?? [])
+            .map(
+              (section) => `
+                <section class="dem-answer-card">
+                  <h4>${app.escapeHTML(section.heading)}</h4>
+                  <ul>${section.points.map((point) => `<li>${app.escapeHTML(point)}</li>`).join("")}</ul>
+                </section>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="dem-answer-example">
+          <b>답안 예시 문장</b>
+          <p>${app.escapeHTML(lesson.answerExample)}</p>
+        </div>
+      </section>
+    `;
+  }
+
   function renderDetail(module) {
     const related = app
       .allQuestions()
@@ -53,11 +129,13 @@ document.addEventListener("DOMContentLoaded", () => {
           </section>
         </div>
 
+        ${renderDemLesson(module.demLesson)}
+
         <section style="margin-top:26px">
           <div class="section-head">
             <div>
-              <h2>연결 기출</h2>
-              <p>Q-net 원문에서 추출된 문항 중 이 모듈과 바로 이어지는 문제입니다.</p>
+              <h2>연계 기출</h2>
+              <p>Q-net 원문에서 추출한 문항 중 이 모듈과 바로 이어지는 문제입니다.</p>
             </div>
           </div>
           <div class="question-list">
@@ -73,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
                       `,
                     )
                     .join("")
-                : `<div class="empty-state">연결 문항이 없습니다.</div>`
+                : `<div class="empty-state">연계 문항이 없습니다.</div>`
             }
           </div>
         </section>
@@ -87,6 +165,9 @@ document.addEventListener("DOMContentLoaded", () => {
       button.classList.toggle("active", button.dataset.moduleId === module.id);
     });
     renderDetail(module);
+    if (window.location.hash !== `#${module.id}`) {
+      window.history.replaceState(null, "", `#${module.id}`);
+    }
   }
 
   if (list && detail && modules.length) {
@@ -108,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    selectModule(modules[0].id);
+    const hashModule = window.location.hash.replace("#", "");
+    selectModule(modules.some((module) => module.id === hashModule) ? hashModule : modules[0].id);
   }
 });
