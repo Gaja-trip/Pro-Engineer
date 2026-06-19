@@ -70,7 +70,7 @@
     const items = [
       ["index.html", "홈"],
       ["curriculum.html", "기본 강의 자료"],
-      ["exams.html", "회차별 문제"],
+      ["exams.html", "기출문제"],
       ["solutions.html", "문제풀이"],
       ["resources.html", "자료실"],
       ["qna.html", "Q&A"],

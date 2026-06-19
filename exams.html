@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>측량 및 지형공간정보기술사 · 회차별 문제</title>
+  <title>측량 및 지형공간정보기술사 · 기출문제</title>
   <link rel="stylesheet" href="assets/css/styles.css">
   <script defer src="assets/js/exams-data.js"></script>
+  <script defer src="assets/js/cadastral-exams-data.js"></script>
   <script defer src="assets/js/curriculum-data.js"></script>
   <script defer src="assets/js/common.js"></script>
   <script defer src="assets/js/exams.js"></script>
@@ -19,7 +20,7 @@
         <nav class="nav-links" data-nav-links>
           <a href="index.html" data-nav>홈</a>
           <a href="curriculum.html" data-nav>답안작성</a>
-          <a href="exams.html" data-nav>기출분석</a>
+          <a href="exams.html" data-nav>기출문제</a>
           <a href="today-lecture.html" data-nav>오늘강의</a>
           <a href="solutions.html" data-nav>기출풀이</a>
           <a href="missions.html" data-nav>생활미션</a>
@@ -28,26 +29,20 @@
     </header>
 
     <main>
-      <section class="page-band">
-        <div class="container platform-page-hero">
-          <div>
-            <p class="eyebrow">회차별 기술사 문제 검색</p>
-            <h1 class="page-title small">회차·교시·출제영역·키워드로 빠르게 찾고 바로 풀이로 이동합니다</h1>
-            <p class="lead">Q-net 공개 자료실의 PDF/HWP 원문을 문항 단위 텍스트로 변환했습니다.</p>
-          </div>
-          <div class="hero-pills">
-            <span>최신순</span>
-            <span>난이도</span>
-            <span>오답만</span>
-          </div>
-        </div>
-      </section>
-
       <section class="page-band tight">
         <div class="container exam-db-layout">
-          <aside class="panel pad filter-panel">
+          <aside class="panel pad filter-panel exam-left-panel">
+            <div class="exam-left-title">
+              <p class="eyebrow">Q-net 공개 기출</p>
+              <h1>기출문제</h1>
+              <p>회차를 선택하면 측량 및 지형공간정보기술사와 지적기술사 문항을 함께 확인합니다.</p>
+            </div>
             <input class="field" type="search" placeholder="문제 키워드 검색" data-search aria-label="기출 문항 검색">
             <h2>필터</h2>
+            <label>
+              <span class="eyebrow">과목</span>
+              <select class="field" data-subject-filter aria-label="과목 필터"></select>
+            </label>
             <label>
               <span class="eyebrow">연도</span>
               <select class="field" data-year-filter aria-label="연도 필터"></select>
@@ -60,19 +55,17 @@
               <h3>주제별 누적 문항</h3>
               <div class="bar-list" data-exam-topic-bars></div>
             </div>
-          </aside>
 
-          <section class="panel pad">
-            <div class="section-head">
+            <div class="exam-list-panel">
               <div>
                 <h2>문제 목록</h2>
-                <p>조건에 맞는 회차를 선택하면 우측에서 문항을 확인합니다.</p>
+                <p>조건에 맞는 회차를 선택하세요.</p>
               </div>
+              <div class="exam-list" data-exam-list></div>
             </div>
-            <div class="exam-list" data-exam-list></div>
-          </section>
+          </aside>
 
-          <aside class="exam-detail-column" data-exam-detail></aside>
+          <section class="exam-detail-column" data-exam-detail></section>
         </div>
       </section>
 
@@ -107,7 +100,7 @@
               </div>
               <label style="display:block;margin-top:18px">
                 <span class="eyebrow">검색어</span>
-                <input class="field" style="width:100%" value="측량 및 지형공간정보 기술사" readonly>
+              <input class="field" style="width:100%" value="측량 및 지형공간정보 기술사 / 지적기술사" readonly>
               </label>
               <label style="display:block;margin-top:12px">
                 <span class="eyebrow">검색 구분</span>

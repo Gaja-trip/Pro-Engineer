@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (quick) {
     const items = [
       ["01", "기본 강의 자료", "이론 PDF, 요약 노트, 연계 기출을 단원별로 제공", "curriculum.html"],
-      ["02", "회차별 기술사 문제", "회차·교시·과목·키워드 필터로 빠른 검색", "exams.html"],
+      ["02", "기출문제", "회차·교시·과목·키워드 필터로 빠른 검색", "exams.html"],
       ["03", "기술사 문제풀이", "모범답안, 채점 기준, 내 답안 비교 학습", "solutions.html"],
       ["04", "자료실 · Q&A", "법령자료 다운로드와 질문 답변 관리", "resources.html"],
     ];
