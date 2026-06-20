@@ -382,6 +382,97 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
+  function renderPptWebResource(resource) {
+    if (!resource) {
+      return "";
+    }
+
+    return `
+      <section class="ppt-web-resource">
+        <div class="detail-heading">
+          <span>PPT 자료</span>
+          <h3>${app.escapeHTML(resource.title)}</h3>
+        </div>
+        <p class="presentation-subtitle">${app.escapeHTML(resource.subtitle)}</p>
+
+        <div class="ppt-resource-hero">
+          <div>
+            <span class="card-news-label">15장 웹 강의자료</span>
+            <h4>${app.escapeHTML(resource.headline)}</h4>
+            <p>${app.escapeHTML(resource.lead)}</p>
+          </div>
+          <div class="ppt-resource-meta">
+            ${(resource.meta ?? [])
+              .map(
+                (item) => `
+                  <div>
+                    <b>${app.escapeHTML(item.value)}</b>
+                    <span>${app.escapeHTML(item.label)}</span>
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+        </div>
+
+        <div class="ppt-phase-grid">
+          ${(resource.phases ?? [])
+            .map(
+              (phase) => `
+                <section class="ppt-phase-card">
+                  <span>${app.escapeHTML(phase.range)}</span>
+                  <h4>${app.escapeHTML(phase.title)}</h4>
+                  <p>${app.escapeHTML(phase.summary)}</p>
+                </section>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="detail-heading compact">
+          <span>슬라이드 웹자료</span>
+          <h3>슬라이드별 핵심 내용</h3>
+        </div>
+        <div class="ppt-slide-grid">
+          ${(resource.slides ?? [])
+            .map(
+              (slide) => `
+                <article class="ppt-slide-card">
+                  <header>
+                    <span>${app.escapeHTML(slide.no)}</span>
+                    <h4>${app.escapeHTML(slide.title)}</h4>
+                  </header>
+                  <p class="ppt-slide-subtitle">${app.escapeHTML(slide.subtitle)}</p>
+                  <p class="ppt-slide-message">${app.escapeHTML(slide.message)}</p>
+                  <ul>${renderBullets(slide.points)}</ul>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="answer-map">
+          <div class="detail-heading compact">
+            <span>답안 연결</span>
+            <h3>PPT 내용을 답안 목차로 바꾸기</h3>
+          </div>
+          ${(resource.answerMap ?? [])
+            .map(
+              (row) => `
+                <div class="answer-map-row">
+                  <b>${app.escapeHTML(row.part)}</b>
+                  <span>${app.escapeHTML(row.write)}</span>
+                </div>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <p class="memory-line">${app.escapeHTML(resource.memoryLine)}</p>
+      </section>
+    `;
+  }
+
   function renderCardNews(news) {
     if (!news) {
       return "";
@@ -1384,6 +1475,201 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   };
 
+  const pptWebResourcesById = {
+    "cadastral-resurvey": {
+      title: "지적재조사 합의경계 개선방안 3D 인포그래픽 자료",
+      subtitle: "첨부 PPT 15장을 웹페이지에서 바로 읽을 수 있도록 강의 흐름, 슬라이드 핵심, 답안 연결 문장으로 재구성했습니다.",
+      headline: "합의는 경계 결정 수단이 아니라 수용성 보완 수단이다.",
+      lead: "경계는 좌표와 기록으로 먼저 설명하고, 토지소유자 합의는 예비경계안 이해 이후에 작동해야 합니다. 이 자료는 지적재조사의 배경, 불부합 유형, 좌표기반 현황측량, 주민협의, 위원회 심의, 성과검증, 유지관리까지 한 페이지에서 복습하도록 구성했습니다.",
+      meta: [
+        { label: "PPT 슬라이드", value: "15장" },
+        { label: "핵심 주제", value: "합의경계" },
+        { label: "답안 활용", value: "25점형" },
+      ],
+      phases: [
+        { range: "01-03", title: "문제 인식", summary: "합의경계의 역할과 지적재조사의 필요성을 잡고, 합의 중심 접근과 자료 기반 판단을 비교한다." },
+        { range: "04-05", title: "불부합 유형", summary: "현실경계형, 공공용지형, 권리충돌형을 구분해 원인 분석의 깊이를 만든다." },
+        { range: "06-08", title: "자료 기반 경계안", summary: "기준점·좌표 현황측량, 디지털 증거팩, 예비경계안과 조정금 시뮬레이션을 연결한다." },
+        { range: "09-12", title: "협의와 심의", summary: "합의 방식의 문제점을 구조화하고 주민협의, 위원회 심의, 조정금 이의신청을 절차화한다." },
+        { range: "13-15", title: "검증과 유지관리", summary: "성과검증, 공시, 전자이력, 디지털 증거 보존을 통해 사후 분쟁을 예방한다." },
+      ],
+      slides: [
+        {
+          no: "01",
+          title: "지적재조사 경계결정의 핵심",
+          subtitle: "합의는 경계 결정 수단이 아니라 수용성 보완 수단",
+          message: "좌표와 기록으로 먼저 설명하고, 합의는 그 이후에 작동해야 한다.",
+          points: [
+            "종이지적의 불부합을 좌표 기반 디지털 지적으로 전환",
+            "토지소유자 합의는 민원 조정에는 유효",
+            "객관 측량·위원회 판단 없이 합의만 앞세우면 분쟁 확대",
+          ],
+        },
+        {
+          no: "02",
+          title: "합의 중심 vs 자료 기반 판단",
+          subtitle: "두 접근의 장점과 위험을 분리해서 보아야 함",
+          message: "좋은 합의는 자료 없는 타협이 아니라 자료를 이해한 선택이다.",
+          points: [
+            "합의 중심은 주민 수용성·신속성이 높지만 정보비대칭 위험이 있다.",
+            "측량·위원회 중심은 객관성·재현성·사후검증에 강하다.",
+            "최적 모델은 예비경계안, 설명, 협의, 심의의 순서다.",
+          ],
+        },
+        {
+          no: "03",
+          title: "사업 배경: 왜 지적재조사가 필요한가",
+          subtitle: "현실과 공부의 불일치를 바로잡는 공적 경계 정비",
+          message: "지적재조사는 단순 도면정비가 아니라 재산권 보호와 디지털 전환이다.",
+          points: [
+            "실제 점유선과 등록경계가 장기간 괴리",
+            "도해지역·축척 차이·기준점 품질 차이 누적",
+            "공공용지·사유지 접합부에서 생활경계가 고착",
+          ],
+        },
+        {
+          no: "04",
+          title: "불부합 유형 1: 현실경계형",
+          subtitle: "논둑·담장·수로·진입로가 오래 쓰이며 경계가 달라짐",
+          message: "눈에 보이는 담장·논둑이 곧 법적 경계인 것은 아니다.",
+          points: [
+            "농촌은 논둑·배수로 이동으로 경작선이 변화한다.",
+            "도시는 담장·화단·주차장 사용이 고착된다.",
+            "현실경계 무다툼과 소유권 무다툼은 구별해야 한다.",
+          ],
+        },
+        {
+          no: "05",
+          title: "불부합 유형 2: 공공용지·권리충돌형",
+          subtitle: "마을안길·구거·도로가 사유지 경계와 충돌하는 사례",
+          message: "공공용지와 연결된 경계는 사적 합의만으로 처리하면 위험하다.",
+          points: [
+            "도로·구거·하천 접합부는 공공성 검토가 필요하다.",
+            "소유자 합의만으로 공공통행 기능을 훼손할 수 있다.",
+            "관리청 의견과 별도 검증을 절차화해야 한다.",
+          ],
+        },
+        {
+          no: "06",
+          title: "기준점·좌표 기반 현황측량",
+          subtitle: "경계 결정의 출발점은 검증 가능한 좌표선",
+          message: "합의한 선보다 먼저 기준점과 좌표로 설명되는 선이 필요하다.",
+          points: [
+            "GNSS·토털스테이션·드론정사영상을 활용한다.",
+            "지적기준점 망실·훼손 여부를 먼저 확인한다.",
+            "기지경계선과 부합하지 않으면 재확인한다.",
+          ],
+        },
+        {
+          no: "07",
+          title: "필지별 디지털 증거팩",
+          subtitle: "협의 전, 소유자가 이해할 수 있는 자료 묶음을 제공",
+          message: "자료가 모이면 설득력이 생기고, 기록이 남으면 분쟁이 줄어든다.",
+          points: [
+            "기준점 현황·점유현황도·과거 측량부를 통합한다.",
+            "현장사진·드론영상·인접필지 좌표를 연결한다.",
+            "필지별 이력과 근거를 하나의 패키지로 보존한다.",
+          ],
+        },
+        {
+          no: "08",
+          title: "예비경계안과 조정금 시뮬레이션",
+          subtitle: "경계 변화가 면적·공공용지·금전에 미치는 영향 제시",
+          message: "주민은 선만 보는 것이 아니라 면적과 돈까지 함께 이해해야 한다.",
+          points: [
+            "예비경계도와 면적 증감표를 함께 제시한다.",
+            "공공용지 영향도와 진출입 불편을 검토한다.",
+            "조정금 예상 범위 설명으로 사후 불신을 완화한다.",
+          ],
+        },
+        {
+          no: "09",
+          title: "토지소유자 합의 방식의 주요 문제",
+          subtitle: "정보비대칭·압박·권리다툼 은폐·조정금 불신",
+          message: "합의서만 있으면 충분하다는 생각이 가장 큰 위험이다.",
+          points: [
+            "측량도와 면적표를 이해하는 수준 차이가 크다.",
+            "마을 영향력·다수 의견이 소수에게 압박이 될 수 있다.",
+            "현실경계 합의가 소유권 분쟁 종결은 아니다.",
+          ],
+        },
+        {
+          no: "10",
+          title: "구조화된 주민 협의 모델",
+          subtitle: "설명자료·회의록·취약소유자 보호를 표준화",
+          message: "주민협의는 서명 수집이 아니라 이해와 기록을 남기는 절차이다.",
+          points: [
+            "공람·서면통보·주민설명회 절차를 충실화한다.",
+            "설명자료 교부 확인과 반대 사유를 기록한다.",
+            "고령자·부재지주에 현장설명·대리확인을 지원한다.",
+          ],
+        },
+        {
+          no: "11",
+          title: "경계결정위원회 심의",
+          subtitle: "합의의 적정성과 법적 타당성을 이유와 함께 남김",
+          message: "위원회 판단은 왜 이 경계가 맞는가를 설명할 수 있어야 한다.",
+          points: [
+            "합의 내용이 객관자료와 충돌하는지 검토한다.",
+            "공공용지·권리충돌 필지는 관리청 의견을 반영한다.",
+            "결정문에 판단 이유와 검토자료를 명시한다.",
+          ],
+        },
+        {
+          no: "12",
+          title: "조정금·이의신청의 분리 관리",
+          subtitle: "경계 결정과 금전 문제를 구분해서 설명하고 처리",
+          message: "조정금 불신은 경계 불복으로 번질 수 있으므로 별도 관리가 필요하다.",
+          points: [
+            "면적 증감과 조정금 산정근거를 명확히 제시한다.",
+            "이의신청 대상과 기간을 공시문에 쉽게 표시한다.",
+            "재산정 가능성·불복 절차를 한눈에 안내한다.",
+          ],
+        },
+        {
+          no: "13",
+          title: "성과 검증·공시 단계",
+          subtitle: "끝나는 단계가 아니라 다음 분쟁을 예방하는 단계",
+          message: "성과검증은 면적계산 확인이 아니라 종합 품질검사여야 한다.",
+          points: [
+            "기준점 상태·경계점 표지·현황사진을 확인한다.",
+            "인접 필지 폐합과 공공용지 접합 여부를 검토한다.",
+            "좌표·사진·측량부·위원회 판단을 연결 보존한다.",
+          ],
+        },
+        {
+          no: "14",
+          title: "유지관리: 디지털 지적의 신뢰 인프라",
+          subtitle: "경계점 전자이력과 데이터 갱신체계가 필요",
+          message: "유지관리의 본질은 합의서를 보관하는 것이 아니라 공적 기록체계를 남기는 것이다.",
+          points: [
+            "경계점 좌표·설치일·사진을 QR 또는 전자이력으로 관리한다.",
+            "후속 토지이동과 지적공부 갱신을 연계한다.",
+            "필지별 디지털 증거팩을 공시 전후 동일하게 보존한다.",
+          ],
+        },
+        {
+          no: "15",
+          title: "결론: 객관자료 위의 합의",
+          subtitle: "합의를 강화하는 것이 아니라 객관자료 위에서만 작동하게 통제",
+          message: "좌표·기록·설명·이의절차가 결합될 때 지적재조사는 신뢰 인프라가 된다.",
+          points: [
+            "경계는 좌표와 기록으로 먼저 설명한다.",
+            "합의는 주민 수용성을 높이는 보완수단이다.",
+            "디지털 증거와 유지관리로 사후 분쟁을 예방한다.",
+          ],
+        },
+      ],
+      answerMap: [
+        { part: "개요", write: "지적재조사는 종이지적의 불부합을 좌표 기반 디지털 지적으로 전환해 재산권 보호와 행정 신뢰성을 확보하는 사업이다." },
+        { part: "문제점", write: "토지소유자간 합의만 앞세우면 정보비대칭, 사실상 압박, 권리다툼 은폐, 공공용지 훼손, 조정금 불신이 발생할 수 있다." },
+        { part: "개선방안", write: "좌표기반 예비경계안, 필지별 디지털 증거팩, 구조화된 주민협의, 경계결정위원회 이유 기재, 성과검증·공시·전자이력관리를 연계한다." },
+        { part: "결론", write: "합의는 경계결정의 기준이 아니라 객관자료 위에서 주민 수용성을 높이는 보완절차로 통제되어야 한다." },
+      ],
+      memoryLine: "암기 문장: 합의경계는 서명으로 정하는 선이 아니라 좌표·기록·설명·검증 위에서 주민이 수용하는 공적 경계선이다.",
+    },
+  };
+
   window.TODAY_NEWS_DIGESTS = newsDigestsById;
 
   function basicLectureFor(lecture) {
@@ -1463,12 +1749,17 @@ document.addEventListener("DOMContentLoaded", () => {
     return digest ? { id: lecture.id, ...digest } : null;
   }
 
+  function pptWebResourceFor(lecture) {
+    return pptWebResourcesById[lecture.id] ?? null;
+  }
+
   function lecturePages(lecture) {
     const basicLecture = basicLectureFor(lecture);
     const newsDigest = newsDigestFor(lecture);
     const summary = summaryFor(lecture);
     const presentation = presentationFor(lecture);
     const cardNews = cardNewsFor(lecture);
+    const pptResource = pptWebResourceFor(lecture);
 
     return [
       { id: "explanation", label: "답안작성", render: () => renderAnswerWriting(lecture) },
@@ -1476,6 +1767,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "basic", label: "기본강의", render: () => renderBasicLecture(basicLecture) },
       { id: "example", label: "답안예시", render: () => renderAnswerExample(lecture) },
       { id: "presentation", label: "PPT 정리", render: () => renderPresentationSummary(presentation) },
+      ...(pptResource ? [{ id: "ppt-resource", label: "PPT 자료", render: () => renderPptWebResource(pptResource) }] : []),
       { id: "card-news", label: "카드뉴스", render: () => renderCardNews(cardNews) },
       { id: "news-digest", label: "보도자료", render: () => renderNewsDigest(newsDigest) },
     ];

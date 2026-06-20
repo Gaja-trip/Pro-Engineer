@@ -1684,6 +1684,7 @@ body.modal-open {
 .lecture-page-content > .basic-lecture,
 .lecture-page-content > .answer-example,
 .lecture-page-content > .presentation-summary,
+.lecture-page-content > .ppt-web-resource,
 .lecture-page-content > .card-news-board,
 .lecture-page-content > .news-digest-board {
   margin-top: 0;
@@ -1716,6 +1717,7 @@ body.modal-open {
 .basic-lecture,
 .answer-example,
 .presentation-summary,
+.ppt-web-resource,
 .card-news-board,
 .news-digest-board {
   margin-top: 16px;
@@ -1878,6 +1880,156 @@ body.modal-open {
   margin: 0;
   color: var(--muted);
   line-height: 1.65;
+}
+
+.ppt-resource-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.36fr);
+  gap: 18px;
+  align-items: stretch;
+  border: 1px solid #c7d3df;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #ffffff 0%, #eef7f3 100%);
+  padding: 18px;
+}
+
+.ppt-resource-hero h4 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  line-height: 1.32;
+}
+
+.ppt-resource-hero p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.ppt-resource-meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.ppt-resource-meta div {
+  display: grid;
+  align-content: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 12px;
+}
+
+.ppt-resource-meta b {
+  display: block;
+  color: var(--sage);
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.ppt-resource-meta span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ppt-phase-grid,
+.ppt-slide-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.ppt-phase-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.ppt-phase-card,
+.ppt-slide-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.ppt-phase-card span {
+  display: inline-flex;
+  margin-bottom: 10px;
+  border-radius: 999px;
+  background: #e7f0ff;
+  color: var(--blue);
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.ppt-phase-card h4,
+.ppt-slide-card h4 {
+  margin: 0 0 8px;
+  line-height: 1.35;
+}
+
+.ppt-phase-card p,
+.ppt-slide-subtitle,
+.ppt-slide-message {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.ppt-slide-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ppt-slide-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #fff;
+}
+
+.ppt-slide-card header {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.ppt-slide-card header span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.ppt-slide-subtitle {
+  margin-top: 4px;
+  font-weight: 800;
+}
+
+.ppt-slide-message {
+  margin-top: 10px;
+  border-left: 4px solid var(--sage);
+  border-radius: var(--radius);
+  background: #eef7f3;
+  padding: 10px;
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.ppt-slide-card ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.ppt-slide-card li {
+  margin: 6px 0;
 }
 
 .agreement-version-grid {
@@ -2908,6 +3060,9 @@ body.modal-open {
   .lecture-toc-grid,
   .concept-card-grid,
   .agreement-version-grid,
+  .ppt-resource-hero,
+  .ppt-phase-grid,
+  .ppt-slide-grid,
   .knowledge-grid,
   .presentation-flow,
   .takeaway-grid,
@@ -2955,6 +3110,10 @@ body.modal-open {
   .lecture-toc-grid,
   .concept-card-grid,
   .agreement-version-grid,
+  .ppt-resource-hero,
+  .ppt-phase-grid,
+  .ppt-slide-grid,
+  .ppt-resource-meta,
   .knowledge-grid,
   .lecture-material-row,
   .concept-card,
