@@ -1348,6 +1348,77 @@ body.modal-open {
   color: var(--muted);
 }
 
+.lecture-problem-resource {
+  align-items: start;
+}
+
+.lecture-problem-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lecture-problem-summary span {
+  border: 1px solid #c7d3df;
+  border-radius: 999px;
+  background: #f8fafc;
+  padding: 5px 9px;
+  color: var(--sage);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.lecture-problem-board {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.lecture-problem-group {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.lecture-problem-group h4 {
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+
+.lecture-problem-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lecture-problem-chips span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #d6e4ef;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  padding: 6px 10px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.lecture-problem-chips b {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--sage);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+}
+
 .qna-layout {
   grid-template-columns: minmax(0, 1fr) 360px;
 }
@@ -1713,6 +1784,52 @@ body.modal-open {
   color: var(--sage);
 }
 
+.problem-visual-note {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.55fr);
+  gap: 16px;
+  align-items: start;
+  margin: 18px 0;
+  border: 1px solid #c7d3df;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.96);
+  padding: 16px;
+}
+
+.problem-visual-note h4 {
+  margin: 8px 0;
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+.problem-visual-note p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.problem-visual-note ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.problem-visual-note li {
+  margin: 5px 0;
+}
+
+.problem-visual-note .image-zoom-trigger {
+  border: 1px solid #c7d3df;
+  background: #fff;
+}
+
+.problem-visual-note img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--radius) - 2px);
+}
+
 .lecture-report,
 .basic-lecture,
 .answer-example,
@@ -1911,6 +2028,29 @@ body.modal-open {
   gap: 10px;
 }
 
+.ppt-resource-side {
+  display: grid;
+  gap: 10px;
+}
+
+.ppt-cover-image,
+.ppt-slide-image .image-zoom-trigger {
+  border: 1px solid #c7d3df;
+  background: #fff;
+}
+
+.ppt-cover-image {
+  align-self: start;
+}
+
+.ppt-cover-image img,
+.ppt-slide-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--radius) - 2px);
+}
+
 .ppt-resource-meta div {
   display: grid;
   align-content: center;
@@ -2005,6 +2145,10 @@ body.modal-open {
   color: #fff;
   font-size: 13px;
   font-weight: 900;
+}
+
+.ppt-slide-image {
+  margin: 12px 0;
 }
 
 .ppt-slide-subtitle {
@@ -3056,6 +3200,7 @@ body.modal-open {
   .mission-board,
   .insight-grid,
   .answer-example-grid,
+  .problem-visual-note,
   .basic-hero,
   .lecture-toc-grid,
   .concept-card-grid,
@@ -3106,6 +3251,7 @@ body.modal-open {
   .mission-board,
   .insight-grid,
   .answer-example-grid,
+  .problem-visual-note,
   .basic-hero,
   .lecture-toc-grid,
   .concept-card-grid,

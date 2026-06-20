@@ -5,6 +5,92 @@ document.addEventListener("DOMContentLoaded", () => {
   const detail = document.querySelector("[data-today-lecture-detail]");
   let selectedId = data.lectures[0]?.id;
   let selectedPage = "explanation";
+  let zoomScale = 1;
+
+  function ensureImageViewer() {
+    let viewer = document.querySelector("[data-image-viewer]");
+    if (viewer) {
+      return viewer;
+    }
+
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `
+        <div class="image-viewer" data-image-viewer aria-hidden="true">
+          <div class="image-viewer-backdrop" data-image-viewer-action="close"></div>
+          <section class="image-viewer-panel" role="dialog" aria-modal="true" aria-label="이미지 확대 보기">
+            <header class="image-viewer-header">
+              <div>
+                <span>이미지 확대 보기</span>
+                <h3 data-image-viewer-title></h3>
+              </div>
+              <div class="image-viewer-controls">
+                <button type="button" data-image-viewer-action="zoom-out" aria-label="이미지 축소">−</button>
+                <button type="button" data-image-viewer-action="reset">100%</button>
+                <button type="button" data-image-viewer-action="zoom-in" aria-label="이미지 확대">+</button>
+                <button type="button" data-image-viewer-action="close">닫기</button>
+              </div>
+            </header>
+            <div class="image-viewer-stage">
+              <img data-image-viewer-img alt="">
+            </div>
+          </section>
+        </div>
+      `,
+    );
+
+    viewer = document.querySelector("[data-image-viewer]");
+    viewer.addEventListener("click", (event) => {
+      const actionButton = event.target.closest("[data-image-viewer-action]");
+      if (!actionButton) {
+        return;
+      }
+      const action = actionButton.dataset.imageViewerAction;
+      if (action === "close") closeImageViewer();
+      if (action === "zoom-in") setImageZoom(zoomScale + 0.25);
+      if (action === "zoom-out") setImageZoom(zoomScale - 0.25);
+      if (action === "reset") setImageZoom(1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && viewer.classList.contains("open")) {
+        closeImageViewer();
+      }
+    });
+
+    return viewer;
+  }
+
+  function setImageZoom(nextScale) {
+    const viewer = ensureImageViewer();
+    const image = viewer.querySelector("[data-image-viewer-img]");
+    const resetButton = viewer.querySelector('[data-image-viewer-action="reset"]');
+    zoomScale = Math.min(3, Math.max(0.5, nextScale));
+    image.style.width = `${Math.round(zoomScale * 100)}%`;
+    resetButton.textContent = `${Math.round(zoomScale * 100)}%`;
+  }
+
+  function openImageViewer(src, alt, title) {
+    const viewer = ensureImageViewer();
+    const image = viewer.querySelector("[data-image-viewer-img]");
+    viewer.querySelector("[data-image-viewer-title]").textContent = title;
+    image.src = src;
+    image.alt = alt;
+    viewer.classList.add("open");
+    viewer.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    setImageZoom(1);
+  }
+
+  function closeImageViewer() {
+    const viewer = document.querySelector("[data-image-viewer]");
+    if (!viewer) {
+      return;
+    }
+    viewer.classList.remove("open");
+    viewer.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+  }
 
   function questionMeta(question) {
     return `제${question.examRound}회 · ${question.period}교시 ${question.no}번`;
@@ -132,6 +218,41 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </div>
         <p class="answer-closing">${app.escapeHTML(example.closing)}</p>
+      </section>
+    `;
+  }
+
+  const explanationMediaById = {
+    nsdi: {
+      title: "제7차 국가공간정보정책 기본계획 인포그래픽",
+      image: "assets/images/national-spatial-policy-7th.jpg",
+      caption: "국가 디지털트윈, 공간정보자원 유통·활용, 융복합 산업 생태계, 정책기반·거버넌스 강화를 한 장으로 정리한 문제 설명 자료입니다.",
+      points: [
+        "법적 근거: 국가공간정보 기본법 제6조",
+        "계획 기간: 2023~2027",
+        "답안 연결: 디지털트윈 구축, 데이터 유통, 산업 육성, 거버넌스 강화",
+      ],
+    },
+  };
+
+  function renderExplanationMedia(lecture) {
+    const media = explanationMediaById[lecture.id];
+    if (!media) {
+      return "";
+    }
+
+    return `
+      <section class="problem-visual-note">
+        <div>
+          <span class="card-news-label">첨부 이미지</span>
+          <h4>${app.escapeHTML(media.title)}</h4>
+          <p>${app.escapeHTML(media.caption)}</p>
+          <ul>${renderBullets(media.points)}</ul>
+        </div>
+        <button class="image-zoom-trigger" type="button" data-zoom-src="${app.escapeHTML(media.image)}" data-zoom-title="${app.escapeHTML(media.title)}" data-zoom-alt="${app.escapeHTML(media.title)} 이미지">
+          <img src="${app.escapeHTML(media.image)}" alt="${app.escapeHTML(media.title)} 이미지">
+          <span>이미지 확대</span>
+        </button>
       </section>
     `;
   }
@@ -386,6 +507,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!resource) {
       return "";
     }
+    const coverImage = resource.coverImage ?? (resource.imageBase ? `${resource.imageBase}01.png` : "");
 
     return `
       <section class="ppt-web-resource">
@@ -401,17 +523,29 @@ document.addEventListener("DOMContentLoaded", () => {
             <h4>${app.escapeHTML(resource.headline)}</h4>
             <p>${app.escapeHTML(resource.lead)}</p>
           </div>
-          <div class="ppt-resource-meta">
-            ${(resource.meta ?? [])
-              .map(
-                (item) => `
-                  <div>
-                    <b>${app.escapeHTML(item.value)}</b>
-                    <span>${app.escapeHTML(item.label)}</span>
-                  </div>
-                `,
-              )
-              .join("")}
+          <div class="ppt-resource-side">
+            ${
+              coverImage
+                ? `
+                  <button class="image-zoom-trigger ppt-cover-image" type="button" data-zoom-src="${app.escapeHTML(coverImage)}" data-zoom-title="${app.escapeHTML(resource.title)} 대표 이미지" data-zoom-alt="${app.escapeHTML(resource.title)} 대표 슬라이드">
+                    <img src="${app.escapeHTML(coverImage)}" alt="${app.escapeHTML(resource.title)} 대표 슬라이드">
+                    <span>대표 이미지 확대</span>
+                  </button>
+                `
+                : ""
+            }
+            <div class="ppt-resource-meta">
+              ${(resource.meta ?? [])
+                .map(
+                  (item) => `
+                    <div>
+                      <b>${app.escapeHTML(item.value)}</b>
+                      <span>${app.escapeHTML(item.label)}</span>
+                    </div>
+                  `,
+                )
+                .join("")}
+            </div>
           </div>
         </div>
 
@@ -435,19 +569,32 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <div class="ppt-slide-grid">
           ${(resource.slides ?? [])
-            .map(
-              (slide) => `
+            .map((slide) => {
+              const image = slide.image ?? (resource.imageBase ? `${resource.imageBase}${slide.no}.png` : "");
+              return `
                 <article class="ppt-slide-card">
                   <header>
                     <span>${app.escapeHTML(slide.no)}</span>
                     <h4>${app.escapeHTML(slide.title)}</h4>
                   </header>
+                  ${
+                    image
+                      ? `
+                        <figure class="ppt-slide-image">
+                          <button class="image-zoom-trigger" type="button" data-zoom-src="${app.escapeHTML(image)}" data-zoom-title="${app.escapeHTML(`Slide ${slide.no}. ${slide.title}`)}" data-zoom-alt="${app.escapeHTML(slide.title)} 슬라이드 이미지">
+                            <img loading="lazy" src="${app.escapeHTML(image)}" alt="${app.escapeHTML(slide.title)} 슬라이드 이미지">
+                            <span>확대 보기</span>
+                          </button>
+                        </figure>
+                      `
+                      : ""
+                  }
                   <p class="ppt-slide-subtitle">${app.escapeHTML(slide.subtitle)}</p>
                   <p class="ppt-slide-message">${app.escapeHTML(slide.message)}</p>
                   <ul>${renderBullets(slide.points)}</ul>
                 </article>
-              `,
-            )
+              `;
+            })
             .join("")}
         </div>
 
@@ -1481,6 +1628,7 @@ document.addEventListener("DOMContentLoaded", () => {
       subtitle: "첨부 PPT 15장을 웹페이지에서 바로 읽을 수 있도록 강의 흐름, 슬라이드 핵심, 답안 연결 문장으로 재구성했습니다.",
       headline: "합의는 경계 결정 수단이 아니라 수용성 보완 수단이다.",
       lead: "경계는 좌표와 기록으로 먼저 설명하고, 토지소유자 합의는 예비경계안 이해 이후에 작동해야 합니다. 이 자료는 지적재조사의 배경, 불부합 유형, 좌표기반 현황측량, 주민협의, 위원회 심의, 성과검증, 유지관리까지 한 페이지에서 복습하도록 구성했습니다.",
+      imageBase: "assets/images/cadastral-resurvey-ppt/slide-",
       meta: [
         { label: "PPT 슬라이드", value: "15장" },
         { label: "핵심 주제", value: "합의경계" },
@@ -1801,6 +1949,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <p>${app.escapeHTML(lecture.overlapReason)}</p>
           <p>${app.escapeHTML(lecture.solution.intro)}</p>
         </section>
+        ${renderExplanationMedia(lecture)}
         <section class="answer-block">
           <h4>답안 작성 순서</h4>
           <ol>
@@ -1896,6 +2045,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   detail?.addEventListener("click", (event) => {
+    const zoomTrigger = event.target.closest("[data-zoom-src]");
+    if (zoomTrigger) {
+      openImageViewer(zoomTrigger.dataset.zoomSrc, zoomTrigger.dataset.zoomAlt, zoomTrigger.dataset.zoomTitle);
+      return;
+    }
+
     const button = event.target.closest("[data-lecture-page]");
     if (!button) {
       return;
