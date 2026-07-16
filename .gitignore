@@ -1,3 +1,7 @@
 node_modules/
 .DS_Store
 npm-debug.log*
+android-app/build/
+android-app/debug.keystore
+dist/*.apk
+dist/*.sha256

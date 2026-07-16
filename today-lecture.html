@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>측량 및 지형공간정보기술사 · 오늘강의</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script defer src="assets/js/exams-data.js"></script>
   <script defer src="assets/js/curriculum-data.js"></script>
@@ -11,7 +12,7 @@
   <script defer src="assets/js/common.js"></script>
   <script defer src="assets/js/today-lecture.js"></script>
 </head>
-<body>
+<body class="today-lecture-page">
   <div class="shell">
     <header class="topbar">
       <div class="nav-inner">
@@ -42,13 +43,26 @@
       <section class="page-band tight">
         <div class="container lecture-workspace">
           <aside class="lecture-sidebar panel pad">
+            <button
+              class="lecture-topic-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="today-lecture-topic-list"
+              data-lecture-topic-toggle
+            >
+              <span class="lecture-topic-toggle-copy">
+                <small data-lecture-topic-progress>학습 주제</small>
+                <strong data-lecture-topic-current>주제를 선택하세요</strong>
+              </span>
+              <span class="lecture-topic-toggle-icon" aria-hidden="true">⌄</span>
+            </button>
             <div class="section-head">
               <div>
                 <h2>문제</h2>
                 <p>공통 주제를 선택하세요.</p>
               </div>
             </div>
-            <div class="lecture-problem-list" data-today-lecture-list></div>
+            <div id="today-lecture-topic-list" class="lecture-problem-list" data-today-lecture-list></div>
           </aside>
           <section class="lecture-detail-panel" data-today-lecture-detail></section>
         </div>

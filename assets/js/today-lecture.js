@@ -3,9 +3,179 @@ document.addEventListener("DOMContentLoaded", () => {
   const data = window.TODAY_LECTURE ?? { lectures: [] };
   const list = document.querySelector("[data-today-lecture-list]");
   const detail = document.querySelector("[data-today-lecture-detail]");
-  let selectedId = data.lectures[0]?.id;
-  let selectedPage = "explanation";
+  const sidebar = document.querySelector(".lecture-sidebar");
+  const topicToggle = document.querySelector("[data-lecture-topic-toggle]");
+  const topicProgress = document.querySelector("[data-lecture-topic-progress]");
+  const topicCurrent = document.querySelector("[data-lecture-topic-current]");
+  const mobileMedia = window.matchMedia("(max-width: 640px)");
+  const reducedMotionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const mobileStorageKey = "surveyor-today-lecture-mobile-v1";
+  const mobileStages = [
+    { id: "grasp", page: "report", label: "핵심 파악", shortLabel: "핵심", minutes: 5 },
+    { id: "understand", page: "basic", label: "개념 이해", shortLabel: "이해", minutes: 10 },
+    { id: "practice", page: "explanation", label: "답안 실습", shortLabel: "실습", minutes: 15 },
+    { id: "review", page: "example", label: "비교·채점", shortLabel: "채점", minutes: 5 },
+    { id: "recap", page: "card-news", label: "핵심 복습", shortLabel: "복습", minutes: 5 },
+  ];
+  const mobileResourcePages = new Set(["presentation", "ppt-resource", "news-digest"]);
+  let mobileState = readMobileState();
+  const savedLectureId = mobileState.selectedId;
+  let selectedId =
+    mobileMedia.matches && data.lectures.some((lecture) => lecture.id === savedLectureId)
+      ? savedLectureId
+      : data.lectures[0]?.id;
+  let selectedPage = mobileMedia.matches
+    ? mobileState.lectures[selectedId]?.lastPage ?? mobileState.selectedPage ?? "report"
+    : "explanation";
+  let topicListOpen = false;
   let zoomScale = 1;
+  let practiceTimerId = null;
+  let practiceTimerLectureId = null;
+  let practiceTimerStartedAt = 0;
+  let practiceTimerBaseSeconds = 0;
+
+  function emptyMobileState() {
+    return {
+      version: 1,
+      selectedId: null,
+      selectedPage: "report",
+      lectures: {},
+    };
+  }
+
+  function readMobileState() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(mobileStorageKey));
+      if (stored?.version === 1 && stored.lectures && typeof stored.lectures === "object") {
+        return { ...emptyMobileState(), ...stored };
+      }
+    } catch (error) {
+      console.warn("모바일 학습 상태를 불러오지 못했습니다.", error);
+    }
+    return emptyMobileState();
+  }
+
+  function writeMobileState() {
+    try {
+      localStorage.setItem(mobileStorageKey, JSON.stringify(mobileState));
+      return true;
+    } catch (error) {
+      console.warn("모바일 학습 상태를 저장하지 못했습니다.", error);
+      return false;
+    }
+  }
+
+  function mobileLectureState(lectureId) {
+    if (!lectureId) {
+      return {
+        completedStages: [],
+        draft: "",
+        elapsedSeconds: 0,
+        timerMinutes: 15,
+        checks: [],
+        lastPage: "report",
+        lastStagePage: "report",
+      };
+    }
+
+    const stored = mobileState.lectures[lectureId] ?? {};
+    const normalized = {
+      completedStages: Array.isArray(stored.completedStages) ? stored.completedStages : [],
+      draft: typeof stored.draft === "string" ? stored.draft : "",
+      elapsedSeconds: Number.isFinite(stored.elapsedSeconds) ? Math.max(0, stored.elapsedSeconds) : 0,
+      timerMinutes: [10, 15, 20, 25].includes(stored.timerMinutes) ? stored.timerMinutes : 15,
+      checks: Array.isArray(stored.checks) ? stored.checks : [],
+      lastPage: typeof stored.lastPage === "string" ? stored.lastPage : "report",
+      lastStagePage: typeof stored.lastStagePage === "string" ? stored.lastStagePage : "report",
+    };
+    mobileState.lectures[lectureId] = normalized;
+    return normalized;
+  }
+
+  function rememberMobileSelection() {
+    if (!mobileMedia.matches || !selectedId) {
+      return;
+    }
+    mobileState.selectedId = selectedId;
+    mobileState.selectedPage = selectedPage;
+    const lectureState = mobileLectureState(selectedId);
+    lectureState.lastPage = selectedPage;
+    if (mobileStageForPage(selectedPage)) {
+      lectureState.lastStagePage = selectedPage;
+    }
+    writeMobileState();
+  }
+
+  function mobileStageForPage(pageId) {
+    return mobileStages.find((stage) => stage.page === pageId);
+  }
+
+  function mobileStageIndex(pageId) {
+    return mobileStages.findIndex((stage) => stage.page === pageId);
+  }
+
+  function mobileStageProgress(lectureId) {
+    const completed = new Set(mobileLectureState(lectureId).completedStages);
+    return mobileStages.filter((stage) => completed.has(stage.id)).length;
+  }
+
+  function setTopicListOpen(open) {
+    topicListOpen = Boolean(open && mobileMedia.matches);
+    sidebar?.classList.toggle("is-topic-open", topicListOpen);
+    topicToggle?.setAttribute("aria-expanded", topicListOpen ? "true" : "false");
+  }
+
+  function updateTopicToggle() {
+    if (!topicToggle || !topicCurrent || !topicProgress) {
+      return;
+    }
+    const lectureIndex = data.lectures.findIndex((lecture) => lecture.id === selectedId);
+    const lecture = data.lectures[lectureIndex];
+    if (!lecture) {
+      topicProgress.textContent = "학습 주제 없음";
+      topicCurrent.textContent = "등록된 주제가 없습니다";
+      topicToggle.disabled = true;
+      return;
+    }
+
+    const completedCount = mobileStageProgress(lecture.id);
+    topicProgress.textContent = `주제 ${lectureIndex + 1}/${data.lectures.length} · ${completedCount}/5 단계 완료`;
+    topicCurrent.textContent = lecture.title;
+    topicToggle.setAttribute("aria-label", `학습 주제 선택. 현재 ${lectureIndex + 1}번 ${lecture.title}`);
+  }
+
+  function announceMobile(message) {
+    if (!mobileMedia.matches) {
+      return;
+    }
+    const live = detail?.querySelector("[data-mobile-learning-live]");
+    if (live) {
+      live.textContent = "";
+      window.setTimeout(() => {
+        live.textContent = message;
+      }, 30);
+    }
+  }
+
+  function focusMobileContent(target = "page") {
+    if (!mobileMedia.matches || !detail) {
+      return;
+    }
+    window.requestAnimationFrame(() => {
+      const focusTarget =
+        target === "topic"
+          ? detail.querySelector("[data-lecture-title]")
+          : detail.querySelector(".lecture-page-content");
+      focusTarget?.scrollIntoView({
+        block: "start",
+        behavior: reducedMotionMedia.matches ? "auto" : "smooth",
+      });
+      focusTarget?.focus({ preventScroll: true });
+      const lecture = data.lectures.find((item) => item.id === selectedId);
+      const stage = mobileStageForPage(selectedPage);
+      announceMobile(`${lecture?.title ?? "학습 주제"}, ${stage?.label ?? "보충자료"}를 열었습니다.`);
+    });
+  }
 
   function ensureImageViewer() {
     let viewer = document.querySelector("[data-image-viewer]");
@@ -218,6 +388,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </div>
         <p class="answer-closing">${app.escapeHTML(example.closing)}</p>
+        ${renderMobileSelfCheck(lecture)}
       </section>
     `;
   }
@@ -1921,8 +2092,361 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
   }
 
+  function formatPracticeTime(totalSeconds) {
+    const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+    const minutes = Math.floor(safeSeconds / 60);
+    const seconds = safeSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function currentPracticeTimerSeconds() {
+    if (practiceTimerId === null || !practiceTimerLectureId) {
+      return mobileLectureState(selectedId).elapsedSeconds;
+    }
+    return practiceTimerBaseSeconds + Math.floor((Date.now() - practiceTimerStartedAt) / 1000);
+  }
+
+  function updatePracticeTimerUI() {
+    const display = detail?.querySelector("[data-mobile-practice-timer-display]");
+    const button = detail?.querySelector("[data-mobile-practice-timer-button]");
+    const lectureState = mobileLectureState(selectedId);
+    const targetSeconds = lectureState.timerMinutes * 60;
+    let isRunning = practiceTimerId !== null && practiceTimerLectureId === selectedId;
+    let elapsed = isRunning ? currentPracticeTimerSeconds() : lectureState.elapsedSeconds;
+    if (isRunning && elapsed >= targetSeconds) {
+      window.clearInterval(practiceTimerId);
+      practiceTimerId = null;
+      practiceTimerLectureId = null;
+      lectureState.elapsedSeconds = targetSeconds;
+      writeMobileState();
+      isRunning = false;
+      elapsed = targetSeconds;
+      announceMobile(`목표 시간 ${lectureState.timerMinutes}분이 되었습니다.`);
+    }
+    if (display) {
+      display.textContent = formatPracticeTime(elapsed);
+      display.setAttribute(
+        "aria-label",
+        `답안 작성 경과 시간 ${Math.floor(elapsed / 60)}분 ${elapsed % 60}초, 목표 ${lectureState.timerMinutes}분`,
+      );
+    }
+    if (button) {
+      button.textContent = isRunning ? "일시정지" : "타이머 시작";
+      button.setAttribute("aria-pressed", isRunning ? "true" : "false");
+    }
+  }
+
+  function pausePracticeTimer() {
+    if (practiceTimerId === null || !practiceTimerLectureId) {
+      return;
+    }
+    const lectureId = practiceTimerLectureId;
+    const elapsed = currentPracticeTimerSeconds();
+    window.clearInterval(practiceTimerId);
+    practiceTimerId = null;
+    practiceTimerLectureId = null;
+    mobileLectureState(lectureId).elapsedSeconds = elapsed;
+    writeMobileState();
+    updatePracticeTimerUI();
+  }
+
+  function startPracticeTimer() {
+    if (!mobileMedia.matches || !selectedId) {
+      return;
+    }
+    if (practiceTimerId !== null) {
+      pausePracticeTimer();
+    }
+    const lectureState = mobileLectureState(selectedId);
+    if (lectureState.elapsedSeconds >= lectureState.timerMinutes * 60) {
+      lectureState.elapsedSeconds = 0;
+      writeMobileState();
+    }
+    practiceTimerLectureId = selectedId;
+    practiceTimerBaseSeconds = lectureState.elapsedSeconds;
+    practiceTimerStartedAt = Date.now();
+    practiceTimerId = window.setInterval(updatePracticeTimerUI, 1000);
+    updatePracticeTimerUI();
+  }
+
+  function resetPracticeTimer() {
+    if (practiceTimerId !== null) {
+      pausePracticeTimer();
+    }
+    mobileLectureState(selectedId).elapsedSeconds = 0;
+    writeMobileState();
+    updatePracticeTimerUI();
+    announceMobile("답안 작성 타이머를 초기화했습니다.");
+  }
+
+  function renderMobileLearningOverview(lecture, pages) {
+    if (!mobileMedia.matches) {
+      return "";
+    }
+    const completedCount = mobileStageProgress(lecture.id);
+    const percent = Math.round((completedCount / mobileStages.length) * 100);
+    const basicLecture = basicLectureFor(lecture);
+    const objective = basicLecture?.coreMessage ?? lecture.overlapReason;
+    const currentStage = mobileStageForPage(selectedPage);
+    const resources = pages.filter((page) => mobileResourcePages.has(page.id));
+    const resourceOpen = resources.some((page) => page.id === selectedPage);
+
+    return `
+      <section class="lecture-mobile-overview" aria-label="모바일 학습 안내">
+        <div class="mobile-learning-status">
+          <div>
+            <span>학습 진도</span>
+            <strong>${completedCount}/${mobileStages.length} 단계 완료</strong>
+          </div>
+          <span>${currentStage ? `${currentStage.label} · 약 ${currentStage.minutes}분` : "보충 학습"}</span>
+        </div>
+        <div
+          class="mobile-learning-progress"
+          role="progressbar"
+          aria-label="현재 주제 학습 완료율"
+          aria-valuemin="0"
+          aria-valuemax="5"
+          aria-valuenow="${completedCount}"
+        >
+          <i style="--mobile-progress:${percent}%"></i>
+        </div>
+        <div class="mobile-learning-goal">
+          <b>오늘의 목표</b>
+          <p>${app.escapeHTML(objective)}</p>
+        </div>
+        <details class="mobile-question-sources">
+          <summary>출제 근거 2문제 보기</summary>
+          <div>
+            <section>
+              <b>측량 및 지형공간정보기술사</b>
+              <span>${questionMeta(lecture.surveyQuestion)}</span>
+              <p>${app.escapeHTML(lecture.surveyQuestion.text)}</p>
+            </section>
+            <section>
+              <b>지적기술사</b>
+              <span>${questionMeta(lecture.cadastralQuestion)}</span>
+              <p>${app.escapeHTML(lecture.cadastralQuestion.text)}</p>
+            </section>
+          </div>
+        </details>
+        ${
+          resources.length
+            ? `
+              <details class="mobile-learning-resources" ${resourceOpen ? "open" : ""}>
+                <summary>보충자료 ${resources.length}개</summary>
+                <div>
+                  ${resources
+                    .map(
+                      (page) => `
+                        <button
+                          class="${page.id === selectedPage ? "active" : ""}"
+                          type="button"
+                          data-lecture-page="${page.id}"
+                          ${page.id === selectedPage ? 'aria-current="page"' : ""}
+                        >${app.escapeHTML(page.label)}</button>
+                      `,
+                    )
+                    .join("")}
+                </div>
+              </details>
+            `
+            : ""
+        }
+      </section>
+    `;
+  }
+
+  function renderMobileStageBar(lecture, pages) {
+    if (!mobileMedia.matches) {
+      return "";
+    }
+    const availablePages = new Set(pages.map((page) => page.id));
+    const completed = new Set(mobileLectureState(lecture.id).completedStages);
+
+    return `
+      <nav class="lecture-mobile-stagebar" aria-label="학습 단계">
+        ${mobileStages
+          .filter((stage) => availablePages.has(stage.page))
+          .map((stage, index) => {
+            const active = stage.page === selectedPage;
+            const done = completed.has(stage.id);
+            return `
+              <button
+                class="mobile-stage-button ${active ? "active" : ""} ${done ? "completed" : ""}"
+                type="button"
+                data-lecture-page="${stage.page}"
+                ${active ? 'aria-current="step"' : ""}
+                aria-label="${index + 1}단계 ${stage.label}, 약 ${stage.minutes}분${done ? ", 완료" : ""}"
+              >
+                <span aria-hidden="true">${done ? "✓" : index + 1}</span>
+                <b>${stage.shortLabel}</b>
+              </button>
+            `;
+          })
+          .join("")}
+      </nav>
+    `;
+  }
+
+  function renderMobileLearningFooter(lecture) {
+    if (!mobileMedia.matches) {
+      return "";
+    }
+    const stageIndex = mobileStageIndex(selectedPage);
+    if (stageIndex < 0) {
+      const lastStagePage = mobileLectureState(lecture.id).lastStagePage;
+      const returnPage = mobileStageForPage(lastStagePage) ? lastStagePage : "report";
+      return `
+        <div class="lecture-mobile-footer single">
+          <button class="mobile-footer-primary" type="button" data-lecture-page="${returnPage}">학습 단계로 돌아가기</button>
+        </div>
+      `;
+    }
+
+    const stage = mobileStages[stageIndex];
+    const previous = mobileStages[stageIndex - 1];
+    const next = mobileStages[stageIndex + 1];
+    const completed = mobileLectureState(lecture.id).completedStages.includes(stage.id);
+    const primaryLabel = next ? `완료하고 ${next.shortLabel}로` : completed ? "학습 완료됨" : "오늘 학습 완료";
+
+    return `
+      <div class="lecture-mobile-footer ${previous ? "" : "single"}">
+        ${previous ? `<button class="mobile-footer-secondary" type="button" data-lecture-page="${previous.page}">이전 단계</button>` : ""}
+        <button
+          class="mobile-footer-primary"
+          type="button"
+          data-mobile-complete-stage="${stage.id}"
+          data-mobile-next-page="${next?.page ?? ""}"
+          ${!next && completed ? "disabled" : ""}
+        >${primaryLabel}</button>
+      </div>
+    `;
+  }
+
+  function renderMobileAnswerPractice(lecture) {
+    const lectureState = mobileLectureState(lecture.id);
+    const safeId = app.escapeHTML(lecture.id);
+    const hintId = `mobile-practice-hint-${safeId}`;
+    const guideId = `mobile-practice-guide-${safeId}`;
+    const textareaId = `mobile-practice-draft-${safeId}`;
+    const draft = app.escapeHTML(lectureState.draft);
+
+    return `
+      <section class="mobile-answer-practice" aria-labelledby="mobile-practice-title-${safeId}">
+        <header>
+          <span>답안 실습</span>
+          <h3 id="mobile-practice-title-${safeId}">먼저 목차를 직접 작성해 보세요</h3>
+          <p>모범 구조를 보기 전에 기억나는 정의·원인·개선방안을 적으면 복습 효과가 커집니다.</p>
+        </header>
+
+        <section class="mobile-practice-question" aria-label="실습 문제">
+          <b>측량 및 지형공간정보기술사 · ${questionMeta(lecture.surveyQuestion)}</b>
+          <p>${app.escapeHTML(lecture.surveyQuestion.text)}</p>
+          <details>
+            <summary>지적기술사 연계 문제도 보기</summary>
+            <p>${app.escapeHTML(lecture.cadastralQuestion.text)}</p>
+          </details>
+        </section>
+
+        <div class="mobile-practice-timer">
+          <div class="mobile-practice-timer-heading">
+            <span>작성 타이머</span>
+            <strong data-mobile-practice-timer-display aria-label="답안 작성 경과 시간">${formatPracticeTime(lectureState.elapsedSeconds)}</strong>
+          </div>
+          <label class="mobile-practice-duration">
+            <span>목표 시간</span>
+            <select data-mobile-practice-duration aria-label="목표 작성 시간">
+              ${[10, 15, 20, 25]
+                .map((minutes) => `<option value="${minutes}" ${lectureState.timerMinutes === minutes ? "selected" : ""}>${minutes}분</option>`)
+                .join("")}
+            </select>
+          </label>
+          <div class="mobile-practice-timer-actions">
+            <button type="button" data-mobile-practice-timer-button aria-pressed="false">타이머 시작</button>
+            <button type="button" data-mobile-practice-timer-reset>초기화</button>
+          </div>
+        </div>
+
+        <label class="mobile-practice-label" for="${textareaId}">나의 답안 목차와 핵심 문장</label>
+        <textarea
+          id="${textareaId}"
+          data-mobile-practice-draft
+          aria-describedby="mobile-practice-help-${safeId}"
+          maxlength="6000"
+          placeholder="예) 1. 개요  2. 발생 원인  3. 문제점  4. 개선방안  5. 결론"
+        >${draft}</textarea>
+        <div class="mobile-practice-save" id="mobile-practice-help-${safeId}">
+          <span data-mobile-practice-count>${lectureState.draft.length.toLocaleString("ko-KR")}자</span>
+          <span data-mobile-practice-save-status aria-live="polite">${lectureState.draft ? "이 기기에 자동 저장됨" : "입력 내용은 이 기기에 자동 저장됩니다"}</span>
+        </div>
+
+        <div class="mobile-practice-tools">
+          <button
+            type="button"
+            aria-expanded="false"
+            aria-controls="${hintId}"
+            data-mobile-toggle-panel="${hintId}"
+            data-mobile-open-label="키워드 힌트"
+            data-mobile-close-label="힌트 닫기"
+          >키워드 힌트</button>
+          <button
+            type="button"
+            aria-expanded="false"
+            aria-controls="${guideId}"
+            data-mobile-toggle-panel="${guideId}"
+            data-mobile-open-label="답안 구조 공개"
+            data-mobile-close-label="답안 구조 닫기"
+          >답안 구조 공개</button>
+        </div>
+
+        <div class="mobile-practice-hint" id="${hintId}" hidden>
+          <b>떠올릴 키워드</b>
+          <div>${answerKeywordsFor(lecture)
+            .map((keyword) => `<span>${app.escapeHTML(keyword)}</span>`)
+            .join("")}</div>
+        </div>
+
+        <div class="mobile-practice-guide" id="${guideId}" hidden>
+          <b>권장 답안 구조</b>
+          <ol>${lecture.solution.steps.map((step) => `<li>${app.escapeHTML(step)}</li>`).join("")}</ol>
+          <p>${app.escapeHTML(lecture.solution.closing)}</p>
+        </div>
+      </section>
+    `;
+  }
+
+  function renderMobileSelfCheck(lecture) {
+    if (!mobileMedia.matches) {
+      return "";
+    }
+    const checked = new Set(mobileLectureState(lecture.id).checks);
+    const checks = [
+      ["definition", "핵심 개념과 문제의 본질을 첫 부분에 설명했다"],
+      ["structure", "원인·문제점·개선방안을 구분해 목차를 구성했다"],
+      ["field", "측량 정확도와 지적 권리관계를 함께 연결했다"],
+      ["closing", "성과검증·공시·유지관리로 결론을 마무리했다"],
+    ];
+
+    return `
+      <fieldset class="mobile-self-check">
+        <legend>내 답안 자기점검</legend>
+        <p>작성한 답안과 예시를 비교하며 확인하세요.</p>
+        ${checks
+          .map(
+            ([id, label]) => `
+              <label>
+                <input type="checkbox" data-mobile-self-check="${id}" ${checked.has(id) ? "checked" : ""}>
+                <span>${label}</span>
+              </label>
+            `,
+          )
+          .join("")}
+      </fieldset>
+    `;
+  }
+
   function renderPageTabs(pages) {
-    if (pages.length < 2) {
+    if (mobileMedia.matches || pages.length < 2) {
       return "";
     }
 
@@ -1942,6 +2466,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderAnswerWriting(lecture) {
+    if (mobileMedia.matches) {
+      return renderMobileAnswerPractice(lecture);
+    }
     return `
       <div class="answer-paper lecture-page-body">
         <section class="answer-block">
@@ -1977,7 +2504,12 @@ document.addEventListener("DOMContentLoaded", () => {
       ? data.lectures
           .map(
             (lecture, index) => `
-              <button class="lecture-problem-button ${lecture.id === selectedId ? "active" : ""}" type="button" data-lecture-id="${lecture.id}">
+              <button
+                class="lecture-problem-button ${lecture.id === selectedId ? "active" : ""}"
+                type="button"
+                data-lecture-id="${lecture.id}"
+                ${lecture.id === selectedId ? 'aria-current="true"' : ""}
+              >
                 <strong>${index + 1}. ${app.escapeHTML(lecture.title)}</strong>
                 <span>측량 ${questionMeta(lecture.surveyQuestion)}</span>
                 <span>지적 ${questionMeta(lecture.cadastralQuestion)}</span>
@@ -1986,6 +2518,7 @@ document.addEventListener("DOMContentLoaded", () => {
           )
           .join("")
       : `<div class="empty-state">오늘 강의 데이터가 없습니다. npm run build:lecture를 실행해 주세요.</div>`;
+    updateTopicToggle();
   }
 
   function renderDetail() {
@@ -2001,16 +2534,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const pages = lecturePages(lecture);
     if (!pages.some((page) => page.id === selectedPage)) {
-      selectedPage = pages[0].id;
+      selectedPage = mobileMedia.matches && pages.some((page) => page.id === "report") ? "report" : pages[0].id;
     }
     const currentPage = pages.find((page) => page.id === selectedPage) ?? pages[0];
+    const mobileContentAttributes = mobileMedia.matches
+      ? `role="region" tabindex="-1" aria-label="${app.escapeHTML(currentPage.label)} 학습 내용"`
+      : "";
+    const titleTag = mobileMedia.matches ? "h1" : "h2";
 
     detail.innerHTML = `
       <article class="lecture-card">
+        ${mobileMedia.matches ? '<p class="lecture-mobile-live" aria-live="polite" data-mobile-learning-live></p>' : ""}
         <div class="tag-row">
           ${lecture.keywords.slice(0, 5).map((keyword) => `<span class="tag">${app.escapeHTML(keyword)}</span>`).join("")}
         </div>
-        <h2 style="margin:14px 0 8px">${app.escapeHTML(lecture.title)}</h2>
+        <${titleTag} style="margin:14px 0 8px" data-lecture-title ${mobileMedia.matches ? 'tabindex="-1"' : ""}>${app.escapeHTML(lecture.title)}</${titleTag}>
 
         <div class="pair-grid">
           <div class="pair-box">
@@ -2025,12 +2563,16 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         </div>
 
+        ${renderMobileLearningOverview(lecture, pages)}
+        ${renderMobileStageBar(lecture, pages)}
         ${renderPageTabs(pages)}
-        <div class="lecture-page-content">
+        <div class="lecture-page-content" ${mobileContentAttributes}>
           ${currentPage.render()}
         </div>
+        ${renderMobileLearningFooter(lecture)}
       </article>
     `;
+    updatePracticeTimerUI();
   }
 
   list?.addEventListener("click", (event) => {
@@ -2038,10 +2580,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!button) {
       return;
     }
+    pausePracticeTimer();
     selectedId = button.dataset.lectureId;
-    selectedPage = "explanation";
+    selectedPage = mobileMedia.matches ? mobileLectureState(selectedId).lastStagePage ?? "report" : "explanation";
+    setTopicListOpen(false);
+    rememberMobileSelection();
     renderList();
     renderDetail();
+    focusMobileContent("topic");
   });
 
   detail?.addEventListener("click", (event) => {
@@ -2051,14 +2597,156 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const panelToggle = event.target.closest("[data-mobile-toggle-panel]");
+    if (panelToggle) {
+      const panel = document.getElementById(panelToggle.dataset.mobileTogglePanel);
+      if (!panel) {
+        return;
+      }
+      panel.hidden = !panel.hidden;
+      panelToggle.setAttribute("aria-expanded", panel.hidden ? "false" : "true");
+      panelToggle.textContent = panel.hidden
+        ? panelToggle.dataset.mobileOpenLabel
+        : panelToggle.dataset.mobileCloseLabel;
+      return;
+    }
+
+    const timerButton = event.target.closest("[data-mobile-practice-timer-button]");
+    if (timerButton) {
+      if (practiceTimerId !== null && practiceTimerLectureId === selectedId) {
+        pausePracticeTimer();
+      } else {
+        startPracticeTimer();
+      }
+      return;
+    }
+
+    if (event.target.closest("[data-mobile-practice-timer-reset]")) {
+      resetPracticeTimer();
+      return;
+    }
+
+    const completeButton = event.target.closest("[data-mobile-complete-stage]");
+    if (completeButton) {
+      pausePracticeTimer();
+      const lectureState = mobileLectureState(selectedId);
+      const stageId = completeButton.dataset.mobileCompleteStage;
+      if (!lectureState.completedStages.includes(stageId)) {
+        lectureState.completedStages.push(stageId);
+      }
+      const nextPage = completeButton.dataset.mobileNextPage;
+      if (nextPage) {
+        selectedPage = nextPage;
+      }
+      rememberMobileSelection();
+      renderList();
+      renderDetail();
+      focusMobileContent("page");
+      return;
+    }
+
     const button = event.target.closest("[data-lecture-page]");
     if (!button) {
       return;
     }
+    pausePracticeTimer();
     selectedPage = button.dataset.lecturePage;
+    rememberMobileSelection();
+    renderDetail();
+    focusMobileContent("page");
+  });
+
+  detail?.addEventListener("input", (event) => {
+    const textarea = event.target.closest("[data-mobile-practice-draft]");
+    if (!textarea) {
+      return;
+    }
+    const lectureState = mobileLectureState(selectedId);
+    lectureState.draft = textarea.value;
+    const saved = writeMobileState();
+    const count = detail.querySelector("[data-mobile-practice-count]");
+    const status = detail.querySelector("[data-mobile-practice-save-status]");
+    if (count) {
+      count.textContent = `${textarea.value.length.toLocaleString("ko-KR")}자`;
+    }
+    if (status) {
+      status.textContent = saved ? "이 기기에 자동 저장됨" : "저장할 수 없어 현재 화면에서만 유지됩니다";
+    }
+  });
+
+  detail?.addEventListener("change", (event) => {
+    const durationSelect = event.target.closest("[data-mobile-practice-duration]");
+    if (durationSelect) {
+      pausePracticeTimer();
+      const lectureState = mobileLectureState(selectedId);
+      lectureState.timerMinutes = Number(durationSelect.value);
+      if (lectureState.elapsedSeconds >= lectureState.timerMinutes * 60) {
+        lectureState.elapsedSeconds = 0;
+      }
+      writeMobileState();
+      updatePracticeTimerUI();
+      announceMobile(`목표 작성 시간을 ${lectureState.timerMinutes}분으로 설정했습니다.`);
+      return;
+    }
+
+    const checkbox = event.target.closest("[data-mobile-self-check]");
+    if (!checkbox) {
+      return;
+    }
+    const lectureState = mobileLectureState(selectedId);
+    const checkId = checkbox.dataset.mobileSelfCheck;
+    const checks = new Set(lectureState.checks);
+    if (checkbox.checked) {
+      checks.add(checkId);
+    } else {
+      checks.delete(checkId);
+    }
+    lectureState.checks = [...checks];
+    writeMobileState();
+  });
+
+  topicToggle?.addEventListener("click", () => {
+    setTopicListOpen(!topicListOpen);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (topicListOpen && sidebar && !sidebar.contains(event.target)) {
+      setTopicListOpen(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && topicListOpen) {
+      setTopicListOpen(false);
+      topicToggle?.focus();
+    }
+  });
+
+  mobileMedia.addEventListener("change", (event) => {
+    pausePracticeTimer();
+    setTopicListOpen(false);
+    if (event.matches) {
+      const storedId = mobileState.selectedId;
+      if (data.lectures.some((lecture) => lecture.id === storedId)) {
+        selectedId = storedId;
+      }
+      selectedPage = mobileLectureState(selectedId).lastPage ?? "report";
+    } else {
+      selectedPage = "explanation";
+    }
+    renderList();
     renderDetail();
   });
 
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      pausePracticeTimer();
+    }
+  });
+  window.addEventListener("pagehide", pausePracticeTimer);
+  window.addEventListener("beforeunload", pausePracticeTimer);
+
+  setTopicListOpen(false);
   renderList();
   renderDetail();
 });
